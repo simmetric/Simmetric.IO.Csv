@@ -2,7 +2,7 @@
 .NET library for handling CSV files in all formats.
 
 ## Why a CSV library?
-I'm sure we've all written a while (streamReader.ReadLine()) loop a million times thinking 'CSV is easy!' and then it always turned out to be more complicated than expected.
+I'm sure we've all written a `while (streamReader.ReadLine()) { }` loop a million times thinking 'CSV is easy!' and then it always turned out to be more complicated than expected.
 Different separator characters, date and number formats can be a real pain, not to mention when a CSV file contains quoted text strings that contain separator characters. In that case you need more than a ReadLine() loop.
 
 ## Usage
