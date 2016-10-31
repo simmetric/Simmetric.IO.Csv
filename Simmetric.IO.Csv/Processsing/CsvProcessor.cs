@@ -64,7 +64,6 @@ namespace Simmetric.IO.Csv
             }
 
             var reader = new CsvReader(inputStream, format);
-            string[] headers = null;
             var fileStopWatch = new System.Diagnostics.Stopwatch();
             var recordStopWatch = new System.Diagnostics.Stopwatch();
             StreamWriter outputWriter = null;
@@ -75,13 +74,8 @@ namespace Simmetric.IO.Csv
                 inputStream.Position = 0;
             }
 
-            //skip header row and extract headers
-            if (format.HasHeaders)
-            {
-                headers = reader.ReadLine();
-            }
-
-            handler.BeginProcessing(documentName, headers);
+            //headers are automatically extracted by CsvReader
+            handler.BeginProcessing(documentName, format.Headers);
 
             //prepare output stream for writing
             if (outputStream != null && outputStream.CanWrite)
@@ -276,7 +270,7 @@ namespace Simmetric.IO.Csv
             stopWatch.Start();
 
             string message;
-            if (!((ICsvRecordHandler)this.handler).ProcessRecord(line, out message))
+            if (!((ICsvRecordHandler)this.handler).ProcessRecord(reader.LinePosition, line, out message))
             {
                 //log or output message
                 if (outputWriter != null)

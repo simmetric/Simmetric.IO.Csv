@@ -29,6 +29,16 @@ namespace Simmetric.IO.Csv
             this.Format = format;
             this.target = target;
             this.writer = new StreamWriter(this.target);
+            //write headers if necessary
+            if (this.Format.HasHeaders)
+            {
+                if (this.Format.Headers == null)
+                {
+                    throw new NullReferenceException("CsvFormat.Headers must be filled to do this.");
+                }
+
+                WriteLine(this.Format.Headers);
+            }
         }
 
         /// <summary>

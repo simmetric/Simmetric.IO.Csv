@@ -11,8 +11,7 @@ namespace TestConsole
     {
         static void Main(string[] args)
         {
-            var format = CsvFormat.Default;
-            format.HasHeaders = false;
+            var format = CsvFormat.DefaultNoHeaders;
 
             var handler = new Simmetric.IO.Csv.Test.Handlers.TestHandler();
             var csvProc = new CsvProcessor(handler);

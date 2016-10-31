@@ -14,7 +14,7 @@ namespace Simmetric.IO.Csv.Test
             var input = "\"1;One\"\tOne One;\"1;;\t; ;One\"" + Environment.NewLine + "2\"Two\";\"2;Two\"";
 
             //default formatting
-            var csvFormat = CsvFormat.Default;
+            var csvFormat = CsvFormat.DefaultNoHeaders;
             var stream = CreateStream(input);
 
             using (var csvReader = new CsvReader(stream, csvFormat))
@@ -94,22 +94,31 @@ namespace Simmetric.IO.Csv.Test
         [TestMethod]
         public void Types()
         {
-            var csvFormat = CsvFormat.Default;
+            var csvFormat = CsvFormat.DefaultNoHeaders;
             var stream = CreateStream("1;2.222;3.333;2004-04-04 04:44:44;true");
             using (var reader = new CsvReader(stream, csvFormat))
             {
-                Assert.AreEqual<int?>(1, reader.ReadAsInt32());
-                Assert.AreEqual<double?>(2.222, reader.ReadAsDouble());
-                Assert.AreEqual<decimal?>(3.333m, reader.ReadAsDecimal());
-                Assert.AreEqual<DateTime?>(new DateTime(2004, 4, 4, 4, 44, 44), reader.ReadAsDateTime());
-                Assert.AreEqual<bool?>(true, reader.ReadAsBoolean());
+                Assert.AreEqual(1, reader.ReadAsInt32());
+                Assert.AreEqual(2.222, reader.ReadAsDouble());
+                Assert.AreEqual(3.333m, reader.ReadAsDecimal());
+                Assert.AreEqual(new DateTime(2004, 4, 4, 4, 44, 44), reader.ReadAsDateTime());
+                Assert.AreEqual(true, reader.ReadAsBoolean());
             }
         }
 
         [TestMethod]
         public void Headers()
         {
+            var csvFormat = CsvFormat.Default;
+            var stream = CreateStream("Header1;Header2;Header3" + Environment.NewLine + "1;2;3" + Environment.NewLine + "4;5;6");
+            using (var reader = new CsvReader(stream, csvFormat))
+            {
+                Assert.IsNotNull(csvFormat.Headers);
+                Assert.AreEqual(string.Join(";", csvFormat.Headers), "Header1;Header2;Header3");
 
+                var line = reader.ReadLine();
+                Assert.AreEqual(string.Join(";", line), "1;2;3");
+            }
         }
 
         [TestMethod]
@@ -118,7 +127,7 @@ namespace Simmetric.IO.Csv.Test
             var input = "\"1;One\"\tOne One;\"1;;\t; ;One\"" + Environment.NewLine + "2\"Two\";\"2;Two\"";
 
             //default formatting
-            var csvFormat = CsvFormat.Default;
+            var csvFormat = CsvFormat.DefaultNoHeaders;
             var stream = CreateStream(input);
 
             using (var csvReader = new CsvReader(stream, csvFormat))

@@ -28,6 +28,10 @@ namespace Simmetric.IO.Csv
         /// Indicates whether the CSV document has a header row
         /// </summary>
         public bool HasHeaders { get; set; }
+        /// <summary>
+        /// If HasHeaders = true, then upon reading a CSV file this will contain the header row
+        /// </summary>
+        public string[] Headers { get; set; }
 
         /// <summary>
         /// Returns true if the given input returns a line or column separator character
@@ -47,6 +51,23 @@ namespace Simmetric.IO.Csv
         /// Creates a format with ColumnSeparator=; LineSeparator=NewLine TextQualifier=" HasHeaders=true
         /// </summary>
         public static CsvFormat Default
+        {
+            get
+            {
+                return new CsvFormat
+                {
+                    ColumnSeparator = ';',
+                    LineSeparator = Environment.NewLine,
+                    TextQualifier = '"',
+                    HasHeaders = true
+                };
+            }
+        }
+
+        /// <summary>
+        /// Creates a format with ColumnSeparator=; LineSeparator=NewLine TextQualifier=" HasHeaders=false
+        /// </summary>
+        public static CsvFormat DefaultNoHeaders
         {
             get
             {

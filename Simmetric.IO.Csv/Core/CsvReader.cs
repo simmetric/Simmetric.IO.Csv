@@ -40,6 +40,12 @@ namespace Simmetric.IO.Csv
         {
             this.Format = format;
             this.reader = new StreamReader(input);
+
+            //read headers
+            if (this.Format.HasHeaders)
+            {
+                this.Format.Headers = ReadLine();
+            }
         }
 
         /// <summary>

@@ -15,7 +15,7 @@ namespace Simmetric.IO.Csv.Test.Handlers
             this.expectedFields = fields;
         }
 
-        public bool ProcessRecord(string[] fields, out string message)
+        public bool ProcessRecord(int recordNum, string[] fields, out string message)
         {
             LastRecord = fields;
             message = null;
@@ -25,7 +25,7 @@ namespace Simmetric.IO.Csv.Test.Handlers
             }
             else
             {
-                message = "Unexpected field count";
+                message = string.Format("Unexpected field count at record {0}", recordNum);
                 return false;
             }
         }

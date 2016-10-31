@@ -40,7 +40,7 @@ namespace Simmetric.IO.Csv
         /// <param name="fields">All fields of the record as a string[]</param>
         /// <param name="message"></param>
         /// <returns></returns>
-        bool ProcessRecord(string[] fields, out string message);
+        bool ProcessRecord(int recordNum, string[] fields, out string message);
     }
 
     /// <summary>

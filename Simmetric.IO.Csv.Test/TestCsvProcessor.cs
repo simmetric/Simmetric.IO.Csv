@@ -9,7 +9,7 @@ namespace Simmetric.IO.Csv.Test
         [TestMethod]
         public void RecordWise()
         {
-            var format = CsvFormat.Default;
+            var format = CsvFormat.DefaultNoHeaders;
             format.HasHeaders = false;
 
             var handler = new Simmetric.IO.Csv.Test.Handlers.TestHandler();
