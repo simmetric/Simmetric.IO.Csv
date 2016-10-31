@@ -35,7 +35,7 @@ public class MyRecordHandler : Simmetric.IO.Csv.ICsvRecordHandler
     System.Data.SqlClient.Transaction trn;
 
     //Called for each record in the CSV file
-    public bool ProcessRecord(string[] fields, out string message)
+    public bool ProcessRecord(int recordNum, string[] fields, out string message)
     {
         //insert the data into a database table
         var com = new System.Data.SqlClient.Command("INSERT INTO table (id, name, address, city, dateofbirth) VALUES (@id, @name, @address, @city, @dateofbirth", trn);
