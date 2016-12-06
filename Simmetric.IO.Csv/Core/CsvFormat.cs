@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace Simmetric.IO.Csv
 {
+    using System.Collections.Generic;
+    using System.Globalization;
+
     /// <summary>
     /// Describes formatting rules for a CSV document.
     /// </summary>
@@ -29,9 +32,13 @@ namespace Simmetric.IO.Csv
         /// </summary>
         public bool HasHeaders { get; set; }
         /// <summary>
-        /// If HasHeaders = true, then upon reading a CSV file this will contain the header row
+        /// If HasHeaders = true, then this property will contain the headers for the CSV file. Automatically filled by <see cref="Simmetric.IO.Csv.CsvReader"/>
         /// </summary>
-        public string[] Headers { get; set; }
+        public IEnumerable<string> Headers { get; set; }
+        /// <summary>
+        /// Culture used in the CSV document
+        /// </summary>
+        public CultureInfo Culture { get; set; }
 
         /// <summary>
         /// Returns true if the given input returns a line or column separator character
@@ -50,36 +57,28 @@ namespace Simmetric.IO.Csv
         /// <summary>
         /// Creates a format with ColumnSeparator=; LineSeparator=NewLine TextQualifier=" HasHeaders=true
         /// </summary>
-        public static CsvFormat Default
+        public static CsvFormat Default => new CsvFormat
         {
-            get
-            {
-                return new CsvFormat
-                {
-                    ColumnSeparator = ';',
-                    LineSeparator = Environment.NewLine,
-                    TextQualifier = '"',
-                    HasHeaders = true
-                };
-            }
-        }
+            ColumnSeparator = ';',
+            Culture = CultureInfo.InvariantCulture,
+            LineSeparator = Environment.NewLine,
+            TextQualifier = '"',
+            TextQualification = TextQualificationOption.OnlyWhenNecessary,
+            HasHeaders = true
+        };
 
         /// <summary>
         /// Creates a format with ColumnSeparator=; LineSeparator=NewLine TextQualifier=" HasHeaders=false
         /// </summary>
-        public static CsvFormat DefaultNoHeaders
+        public static CsvFormat DefaultNoHeaders => new CsvFormat
         {
-            get
-            {
-                return new CsvFormat
-                {
-                    ColumnSeparator = ';',
-                    LineSeparator = Environment.NewLine,
-                    TextQualifier = '"',
-                    HasHeaders = true
-                };
-            }
-        }
+            ColumnSeparator = ';',
+            Culture = CultureInfo.InvariantCulture,
+            LineSeparator = Environment.NewLine,
+            TextQualifier = '"',
+            TextQualification = TextQualificationOption.OnlyWhenNecessary ,
+            HasHeaders = false
+        };
 
         /// <summary>
         /// Returns true if the input string contains one or more alphabetic characters

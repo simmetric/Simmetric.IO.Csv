@@ -39,6 +39,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\CsvFormat.cs" />
+    <Compile Include="Core\IAsyncCsvReader.cs" />
+    <Compile Include="Core\ICsvReader.cs" />
+    <Compile Include="Core\ICsvWriter.cs" />
     <Compile Include="Processsing\CsvProcessor.cs" />
     <Compile Include="Core\CsvReader.cs" />
     <Compile Include="Core\CsvWriter.cs" />

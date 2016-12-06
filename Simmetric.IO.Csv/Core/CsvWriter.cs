@@ -2,61 +2,64 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Simmetric.IO.Csv
 {
+
     /// <summary>
     /// Provides fast, non-cached, forward-only writing of values in CSV format.
     /// </summary>
-    public class CsvWriter : IDisposable
+    public class CsvWriter : ICsvWriter
     {
         /// <summary>
         /// The format used when writing CSV
         /// </summary>
         public CsvFormat Format { get; protected set; }
-        Stream target;
-        StreamWriter writer;
+        //Stream target;
+        TextWriter writer;
 
         /// <summary>
         /// Instantiates a CSV writer class to write the specified format to the specified stream.
         /// </summary>
-        /// <param name="format"></param>
-        /// <param name="target"></param>
-        public CsvWriter(System.IO.Stream target, CsvFormat format)
+        /// <param name="format">The CSV format</param>
+        /// <param name="writer">The TextWriter that receives output</param>
+        public CsvWriter(System.IO.TextWriter writer, CsvFormat format)
         {
             this.Format = format;
-            this.target = target;
-            this.writer = new StreamWriter(this.target);
+            this.writer = writer;
             //write headers if necessary
             if (this.Format.HasHeaders)
             {
                 if (this.Format.Headers == null)
                 {
-                    throw new NullReferenceException("CsvFormat.Headers must be filled to do this.");
+                    throw new InvalidOperationException("CsvFormat.Headers must be filled when CsvFormat.HasHeaders is true");
                 }
 
                 WriteLine(this.Format.Headers);
             }
         }
 
+        public CsvWriter(Stream stream, CsvFormat format) : this(new StreamWriter(stream), format)
+        {
+            //empty constructor for backwards compatibiltiy, inherits this(TextWriter, CsvFormat)
+        }
+
         /// <summary>
         /// Writes the given set of fields to a CSV formatted line.
         /// </summary>
         /// <param name="line">Non-formatted, raw field values</param>
-        public void WriteLine(string[] line)
+        public void WriteLine(IEnumerable<string> line)
         {
             if (line == null)
             {
-                throw new ArgumentNullException("line");
+                throw new ArgumentNullException(nameof(line));
             }
 
-            for (int i = 0; i < line.Length; i++)
+            for (int i = 0; i < line.Count(); i++)
             {
-                WriteField(line[i]);
+                WriteField(line.ElementAt(i));
                 //append column separator, except at the end of the line
-                if (i < line.Length - 1)
+                if (i < line.Count() - 1)
                 {
                     WriteColumnSeparator();
                 }
@@ -89,7 +92,7 @@ namespace Simmetric.IO.Csv
         {
             if(string.IsNullOrEmpty(field))
             {
-                throw new ArgumentNullException("field");
+                throw new ArgumentNullException(nameof(field));
             }
 
             //verify if text qualifiers must be added
@@ -130,7 +133,6 @@ namespace Simmetric.IO.Csv
         public void Close()
         {
             this.writer.Close();
-            this.target.Close();
         }
 
         /// <summary>
@@ -153,11 +155,6 @@ namespace Simmetric.IO.Csv
                 {
                     this.writer.Dispose();
                     this.writer = null;
-                }
-                if (this.target != null)
-                {
-                    this.target.Dispose();
-                    this.target = null;
                 }
             }
         }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Simmetric.IO.Csv
+﻿namespace Simmetric.IO.Csv
 {
     /// <summary>
     /// Contains information on the result of a processed CSV document
