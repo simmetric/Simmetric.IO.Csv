@@ -31,14 +31,14 @@ ICsvRecordHandler takes one record at a time, while ICsvSetHandler can take sets
 public class MyRecordHandler : Simmetric.IO.Csv.ICsvRecordHandler
 {
     int rowNumber;
-    System.Data.SqlClient.Connection con;
-    System.Data.SqlClient.Transaction trn;
+    System.Data.SqlClient.SqlConnection con;
+    System.Data.SqlClient.SqlTransaction trn;
 
     //Called for each record in the CSV file
     public bool ProcessRecord(int recordNum, string[] fields, out string message)
     {
         //insert the data into a database table
-        var com = new System.Data.SqlClient.Command("INSERT INTO table (id, name, address, city, dateofbirth) VALUES (@id, @name, @address, @city, @dateofbirth", trn);
+        var com = new System.Data.SqlClient.SqlCommand("INSERT INTO table (id, name, address, city, dateofbirth) VALUES (@id, @name, @address, @city, @dateofbirth", con);
         com.Parameters.AddWithValue("@id", int.Parse(fields[0]));
         com.Parameters.AddWithValue("@name", fields[1]);
         com.Parameters.AddWithValue("@address", fields[2]);
@@ -53,7 +53,7 @@ public class MyRecordHandler : Simmetric.IO.Csv.ICsvRecordHandler
     public void BeginProcessing(string fileName, string[] headers = null)
     {
         //initialize DB connection
-        con = new System.Data.SqlClient.Connection("your connectionstring here");
+        con = new System.Data.SqlClient.SqlConnection("your connectionstring here");
         con.Open();
         trn = con.BeginTransaction();
         rowNumber = 0;

@@ -13,9 +13,8 @@ namespace TestConsole
         {
             var format = CsvFormat.DefaultNoHeaders;
 
-            var handler = new Simmetric.IO.Csv.Test.Handlers.TestHandler();
+            var handler = new MyRecordHandler();
             var csvProc = new CsvProcessor(handler);
-            handler.SetExpectations(5);
             int recordsProcessed = csvProc.ProcessCsv("Testcase RecordWise", "1;2.0;03;\"Four\";\"Fi;\r\nVe\"", format, 0, 0).RowsProcessed;
         }
     }

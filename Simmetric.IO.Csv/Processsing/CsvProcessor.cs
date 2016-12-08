@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Simmetric.IO.Csv
 {
@@ -9,13 +10,17 @@ namespace Simmetric.IO.Csv
     /// </summary>
     public class CsvProcessor
     {
-        private ICsvHandler handler;
-        private List<string[]> recordSet;
+        private readonly ICsvHandler handler;
+        private readonly ICsvRecordHandler recordHandler;
+        private readonly ICsvSetHandler setHandler;
+        private List<List<string>> recordSet;
 
         /// <param name="handler">Instance of a class implementing ICsvHandler that performs a custom defined task using CSV record input</param>
         public CsvProcessor(ICsvHandler handler)
         {
             this.handler = handler;
+            this.recordHandler = handler as ICsvRecordHandler;
+            this.setHandler = handler as ICsvSetHandler;
         }
 
         /// <summary>
@@ -56,11 +61,16 @@ namespace Simmetric.IO.Csv
         {
             if (inputStream == null)
             {
-                throw new ArgumentNullException("inputStream");
+                throw new ArgumentNullException(nameof(inputStream));
             }
             if (format == null)
             {
-                throw new ArgumentNullException("format");
+                throw new ArgumentNullException(nameof(format));
+            }
+            if (processingSetSize > 0 && this.setHandler == null)
+            {
+                throw new InvalidOperationException(
+                    "Recordset processing cannot be used on a CSV handler that does not implement ICsvSetHandler");
             }
 
             var reader = new CsvReader(inputStream, format);
@@ -92,16 +102,9 @@ namespace Simmetric.IO.Csv
             }
 
             //prepare recordset for set processing
-            if (processingSetSize > 1)
+            if (processingSetSize > 0)
             {
-                if (this.handler is ICsvSetHandler)
-                {
-                    this.recordSet = new List<string[]>(processingSetSize);
-                }
-                else
-                {
-                    throw new InvalidOperationException("Recordset processing cannot be used on a CSV handler that does not implement ICsvSetHandler");
-                }
+                this.recordSet = new List<List<string>>(processingSetSize);
             }
 
             try
@@ -149,11 +152,8 @@ namespace Simmetric.IO.Csv
             fileStopWatch.Stop();
             handler.EndProcessing();
            
-            if (outputWriter != null)
-            {
-                outputWriter.WriteLine(string.Format("Finished processing {0}, did {1} records in {2} seconds.", documentName, reader.LinePosition, fileStopWatch.ElapsedMilliseconds / 1000m));
-                outputWriter.Flush();
-            }
+            outputWriter?.WriteLine(string.Format("Finished processing {0}, did {1} records in {2} seconds.", documentName, reader.LinePosition, fileStopWatch.ElapsedMilliseconds / 1000m));
+            outputWriter?.Flush();
 
             return reader.LinePosition;
         }
@@ -269,20 +269,17 @@ namespace Simmetric.IO.Csv
             stopWatch.Reset();
             stopWatch.Start();
 
-            string message;
-            if (!((ICsvRecordHandler)this.handler).ProcessRecord(reader.LinePosition, line, out message))
+            string message = null;
+            if (!(this.recordHandler?.ProcessRecord(reader.LinePosition, line, out message) ?? false))
             {
-                //log or output message
-                if (outputWriter != null)
-                {
-                    outputWriter.WriteLine(string.Format("{0}: {1}. {2} sec", reader.LinePosition, message, (double)stopWatch.ElapsedMilliseconds / 1000.0));
-                }
+                //if ProcessRecord returned false, log or output message
+                outputWriter?.WriteLine(string.Format("{0}: {1}. {2} sec", reader.LinePosition, message, (double)stopWatch.ElapsedMilliseconds / 1000.0));
             }
 
             //flush the output every 100 records
-            if (reader.LinePosition % 100 == 0 && outputWriter != null)
+            if (reader.LinePosition % 100 == 0)
             {
-                outputWriter.Flush();
+                outputWriter?.Flush();
             }
         }
 
@@ -292,14 +289,14 @@ namespace Simmetric.IO.Csv
             stopWatch.Start();
 
             var line = reader.ReadLine();
-            this.recordSet.Add(line);
+            this.recordSet.Add(line.ToList());
 
             //when a set is completed or the stream is at its end, feed the collected records to the handler
-            string[] messages;
+            IEnumerable<string> messages = null;
             if (reader.LinePosition % setSize == 0 || (reader.EndOfStream && recordSet.Count > 0))
             {
                 //feed recordset to handler
-                if (!((ICsvSetHandler)this.handler).ProcessRecordSet(recordSet.ToArray(), out messages) && outputWriter != null)
+                if (!(setHandler?.ProcessRecordSet(recordSet.ToArray(), out messages) ?? false) && outputWriter != null && messages != null)
                 {
                     //output messages
                     foreach (string message in messages)
