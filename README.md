@@ -107,6 +107,14 @@ while (!reader.EndOfStream)
    
    //read a line and return a populated object
    //note: the CSV must have headers that correspond to field names in a class
+   class Person 
+   {
+      public int ID { get; set; }
+      public string Name { get; set; }
+      public string Address { get; set; }
+      public string City { get; set; }
+      public DateTime DateOfBirth { get; set; }
+   }
    Person person = reader.ReadLine<Person>();
 
    //note: each Read call advances the position of the CsvReader
@@ -116,11 +124,19 @@ while (!reader.EndOfStream)
 It is also possible to read a CSV file to the end and return all rows as an iterator:
 ```csharp
 var reader = new CsvReader(fileStream, format);
-foreach (var line in reader.ReadToEnd())
+foreach (IEnumerable<string> line in reader.ReadToEnd())
 {
    //line contains all fields as strings, just like ReadLine()
 }
 
+class Person 
+{
+   public int ID { get; set; }
+   public string Name { get; set; }
+   public string Address { get; set; }
+   public string City { get; set; }
+   public DateTime DateOfBirth { get; set; }
+}
 foreach (Person person in reader.ReadToEnd<Person>())
 {
    //person is an instance of class Person
