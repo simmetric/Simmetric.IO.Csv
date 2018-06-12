@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Globalization;
+using System.Reflection;
 
 namespace Simmetric.IO.Csv
 {
@@ -95,39 +96,65 @@ namespace Simmetric.IO.Csv
         public T ReadLine<T>() where T : new()
         {
             var type = typeof(T);
+            var fields = type.GetFields();
+            var props = type.GetProperties();
             var result = new T();
             if (Format.HasHeaders)
             {
                 foreach (var header in Format.Headers)
                 {
-                    var field = type.GetField(header);
-                    var value = new object();
-                    switch (Type.GetTypeCode(field.FieldType))
+                    Type currentType = null;
+                    FieldInfo field = null;
+                    PropertyInfo property = null;
+                    if (fields.Any(f => f.Name.Equals(header, StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        case TypeCode.Int32:
-                            value = ReadAsInt32();
-                            break;
-                        case TypeCode.Double:
-                            value = ReadAsDouble();
-                            break;
-                        case TypeCode.String:
-                            value = Read();
-                            break;
-                        case TypeCode.DateTime:
-                            value = ReadAsDateTime();
-                            break;
-                        case TypeCode.Decimal:
-                            value = ReadAsDecimal();
-                            break;
-                        case TypeCode.Boolean:
-                            value = ReadAsBoolean();
-                            break;
+                        field = fields.Single(f => f.Name.Equals(header, StringComparison.InvariantCultureIgnoreCase));
+                        currentType = field.FieldType;
                     }
-                    field.SetValue(result,value);
+                    else if (props.Any(p => p.Name.Equals(header, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        property = props.Single(p => p.Name.Equals(header, StringComparison.InvariantCultureIgnoreCase));
+                        currentType = property.PropertyType;
+                    }
+
+                    var value = GetValue(currentType);
+                    if (field != null)
+                    {
+                        field.SetValue(result, value);
+                    }
+                    else if (property != null)
+                    {
+                        property.SetValue(result, value);
+                    }
                 }
             }
 
             return result;
+        }
+
+        private object GetValue(Type currentType)
+        {
+            switch (Type.GetTypeCode(currentType))
+            {
+                case TypeCode.Int32:
+                    return ReadAsInt32();
+                case TypeCode.Double:
+                    return ReadAsDouble();
+                case TypeCode.String:
+                    return Read();
+                case TypeCode.DateTime:
+                    return ReadAsDateTime();
+                case TypeCode.Decimal:
+                    return ReadAsDecimal();
+                case TypeCode.Boolean:
+                    return ReadAsBoolean();
+                default:
+                    if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    {
+                        return GetValue(Nullable.GetUnderlyingType(currentType));
+                    }
+                    return null;
+            }
         }
 
         /// <summary>

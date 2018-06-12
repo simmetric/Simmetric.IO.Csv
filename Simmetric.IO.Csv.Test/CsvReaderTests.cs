@@ -82,7 +82,7 @@ namespace Simmetric.IO.Csv.Test
         {
             var csvFormat = CsvFormat.Default;
             SetupReader(
-                "myInt;myDouble;myString;myDateTime\n1;2.3;some text;2018-01-01 12:34" + (char)3
+                "myInt;myDouble;myString;myDateTime;myIntProperty;myNullableIntProperty\n1;2.3;some text;2018-01-01 12:34;5;" + (char)3
                 );
             var reader = GetReader(csvFormat);
 
@@ -92,6 +92,8 @@ namespace Simmetric.IO.Csv.Test
             Assert.AreEqual(1, result.myInt);
             Assert.AreEqual(2.3, result.myDouble);
             Assert.AreEqual("some text", result.myString);
+            Assert.AreEqual(5, result.myIntProperty);
+            Assert.AreEqual(null, result.myNullableIntProperty);
             Assert.AreEqual(new DateTime(2018, 1, 1, 12, 34, 0), result.myDateTime);
         }
 
@@ -124,7 +126,7 @@ namespace Simmetric.IO.Csv.Test
         public void ReadToEndGeneric_MultipleLines_ReturnsMultipleObjects()
         {
             SetupReader(
-                "myInt;myDouble;myString;myDateTime\n1;2.3;some text;2018-01-01 12:34\n1;2.3;some text;2018-01-01 12:34" + (char)3
+                "myInt;myDouble;myString;myDateTime;myIntProperty;myNullableIntProperty\n1;2.3;some text;2018-01-01 12:34;5;null\n1;2.3;some text;2018-01-01 12:34;5;null" + (char)3
                 );
             var reader = GetReader(CsvFormat.Default);
             var expectedResult = new GenericTestClass
@@ -132,7 +134,9 @@ namespace Simmetric.IO.Csv.Test
                 myInt = 1,
                 myDouble = 2.3,
                 myString = "some text",
-                myDateTime = new DateTime(2018, 1, 1, 12, 34, 00)
+                myDateTime = new DateTime(2018, 1, 1, 12, 34, 00),
+                myIntProperty = 5,
+                myNullableIntProperty = null
             };
 
             var result = reader.ReadToEnd<GenericTestClass>();
