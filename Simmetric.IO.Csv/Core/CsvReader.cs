@@ -14,7 +14,8 @@ namespace Simmetric.IO.Csv
     {
         //status
         bool isInText = false;
-        int currentLine = 0;
+        bool endOfStream = false;
+
         //internals
         TextReader reader;
 
@@ -28,16 +29,13 @@ namespace Simmetric.IO.Csv
         /// </summary>
         public bool EndOfStream
         {
-            get { return reader?.Peek() == -1; }
+            get { return endOfStream || reader?.Peek() == -1; }
         }
 
         /// <summary>
         /// Gets the zero-based line number of the current position in the CSV document.
         /// </summary>
-        public int LinePosition
-        {
-            get { return this.currentLine; }
-        }
+        public int LinePosition { get; private set; } = 0;
 
         /// <summary>
         /// Instantiates a new CSV reader for the given stream, which must be formatted according to the given CSV format.
@@ -50,9 +48,9 @@ namespace Simmetric.IO.Csv
             this.reader = reader;
 
             //read headers
-            if (this.Format.HasHeaders)
+            if (Format.HasHeaders)
             {
-                this.Format.Headers = ReadLine();
+                Format.Headers = ReadLine();
             }
         }
 
@@ -68,13 +66,80 @@ namespace Simmetric.IO.Csv
         public IEnumerable<string> ReadLine()
         {
             List<string> fields = new List<string>();
-            var lineToRead = currentLine;
-            while (!this.EndOfStream && currentLine == lineToRead)
+            var lineToRead = LinePosition;
+            while (!EndOfStream && LinePosition == lineToRead)
             {
                 fields.Add(Read());
             }
 
             return fields;
+        }
+
+        /// <summary>
+        /// Reads until the end of the CSV file and returns all lines as a nested IEnumerable<string>
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<IEnumerable<string>> ReadToEnd()
+        {
+            while (!EndOfStream)
+            {
+                yield return ReadLine();
+            }
+        }
+
+        /// <summary>
+        /// Reads the next line and uses it to populate a new instance of class T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T ReadLine<T>() where T : new()
+        {
+            var type = typeof(T);
+            var result = new T();
+            if (Format.HasHeaders)
+            {
+                foreach (var header in Format.Headers)
+                {
+                    var field = type.GetField(header);
+                    var value = new object();
+                    switch (Type.GetTypeCode(field.FieldType))
+                    {
+                        case TypeCode.Int32:
+                            value = ReadAsInt32();
+                            break;
+                        case TypeCode.Double:
+                            value = ReadAsDouble();
+                            break;
+                        case TypeCode.String:
+                            value = Read();
+                            break;
+                        case TypeCode.DateTime:
+                            value = ReadAsDateTime();
+                            break;
+                        case TypeCode.Decimal:
+                            value = ReadAsDecimal();
+                            break;
+                        case TypeCode.Boolean:
+                            value = ReadAsBoolean();
+                            break;
+                    }
+                    field.SetValue(result,value);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Reads until the end of the CSV file and returns all lines as an IEnumerable of type T
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<T> ReadToEnd<T>() where T : new()
+        {
+            while (!EndOfStream)
+            {
+                yield return ReadLine<T>();
+            }
         }
 
         /// <summary>
@@ -89,32 +154,38 @@ namespace Simmetric.IO.Csv
             string field = null;
             bool foundLineSeparator = false;
 
-            while (!this.EndOfStream)
+            while (!EndOfStream)
             {
                 //crawl the stream
-                currentChar = this.ReadChar();
+                currentChar = ReadChar();
                 //when text qualifier is found, set 'inText'
-                if (this.Format.TextQualifier != null && currentChar == this.Format.TextQualifier)
+                if (Format.TextQualifier != null && currentChar == Format.TextQualifier)
                 {
                     isInText = !isInText;
                 }
-                else if (!isInText && currentChar == this.Format.ColumnSeparator)
+                else if (!isInText && currentChar == Format.ColumnSeparator)
                 {
                     //when not inText and column separator is found, the end of the field is reached
                     break;
                 }
-                else if (!isInText && this.Format.LineSeparator.Contains(currentChar))
+                else if (!isInText && Format.LineSeparator.Contains(currentChar))
                 {
                     //when not inText and a line separator char is found, the end of the field and line is reached
                     //skip all following line separators
-                    while (!this.EndOfStream && this.Format.LineSeparator.Contains((char)reader.Peek()))
+                    while (!EndOfStream && Format.LineSeparator.Contains((char)reader.Peek()))
                     {
-                        this.ReadChar();
+                        ReadChar();
                     }
 
                     //increase line count
-                    currentLine++;
+                    LinePosition++;
                     foundLineSeparator = true;
+                    break;
+                }
+                else if (!isInText && currentChar == (char)3) //Unicode end of text character
+                {
+                    //at end of text - this is here primarily for unit testing purposes
+                    endOfStream = true;
                     break;
                 }
                 else
@@ -127,9 +198,9 @@ namespace Simmetric.IO.Csv
             isInText = false;
 
             //if the line ended because of EndOfStream, we still need to increase the line number
-            if (!foundLineSeparator && this.EndOfStream)
+            if (!foundLineSeparator && EndOfStream)
             {
-                currentLine++;
+                LinePosition++;
             }
 
             //write cache to field and return
@@ -148,8 +219,7 @@ namespace Simmetric.IO.Csv
         public bool? ReadAsBoolean()
         {
             var value = Read();
-            bool result;
-            if (bool.TryParse(value, out result))
+            if (bool.TryParse(value, out bool result))
             {
                 return result;
             }
@@ -164,8 +234,7 @@ namespace Simmetric.IO.Csv
         public DateTime? ReadAsDateTime()
         {
             var value = Read();
-            DateTime result;
-            if (DateTime.TryParse(value, Format.Culture, DateTimeStyles.None, out result))
+            if (DateTime.TryParse(value, Format.Culture, DateTimeStyles.None, out DateTime result))
             {
                 return result;
             }
@@ -180,8 +249,7 @@ namespace Simmetric.IO.Csv
         public decimal? ReadAsDecimal()
         {
             var value = Read();
-            decimal result;
-            if (decimal.TryParse(value, NumberStyles.Float, Format.Culture, out result))
+            if (decimal.TryParse(value, NumberStyles.Float, Format.Culture, out decimal result))
             {
                 return result;
             }
@@ -196,8 +264,7 @@ namespace Simmetric.IO.Csv
         public double? ReadAsDouble()
         {
             var value = Read();
-            double result;
-            if (double.TryParse(value, NumberStyles.Float, Format.Culture, out result))
+            if (double.TryParse(value, NumberStyles.Float, Format.Culture, out double result))
             {
                 return result;
             }
@@ -212,8 +279,7 @@ namespace Simmetric.IO.Csv
         public int? ReadAsInt32()
         {
             var value = Read();
-            int result;
-            if (int.TryParse(value, NumberStyles.Integer, Format.Culture, out result))
+            if (int.TryParse(value, NumberStyles.Integer, Format.Culture, out int result))
             {
                 return result;
             }
@@ -235,7 +301,7 @@ namespace Simmetric.IO.Csv
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -246,10 +312,10 @@ namespace Simmetric.IO.Csv
         {
             if (disposing)
             {
-                if (this.reader != null)
+                if (reader != null)
                 {
-                    this.reader.Dispose();
-                    this.reader = null;
+                    reader.Dispose();
+                    reader = null;
                 }
             }
         }

@@ -1,12 +1,13 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace Simmetric.IO.Csv.Test
 {
+    using System.Collections.Generic;
     using System.Linq;
     using NSubstitute;
+    using Simmetric.IO.Csv.Test.Class;
 
     [TestClass]
     public class CsvReaderTests
@@ -22,7 +23,7 @@ namespace Simmetric.IO.Csv.Test
         [TestMethod]
         public void ReadLine_MultipleLinesMultipleFields_SplitsLinesAndFieldsCorrectly()
         {
-            var input = "OneOne;OneTwo\nTwoOne;TwoTwo\n";
+            var input = "OneOne;OneTwo\nTwoOne;TwoTwo" + (char)3;
             var expectedLineOneFieldOne = "OneOne";
             var expectedLineOneFieldTwo = "OneTwo";
             var expectedLineTwoFieldOne = "TwoOne";
@@ -47,7 +48,7 @@ namespace Simmetric.IO.Csv.Test
         public void ReadAsType_AllTypes_CorrectTypeConversion()
         {
             var csvFormat = CsvFormat.DefaultNoHeaders;
-            SetupReader("1;2.222;3.333;2004-04-04 04:44:44;true;");
+            SetupReader("1;2.222;3.333;2004-04-04 04:44:44;true" + (char)3);
 
             var reader = GetReader(csvFormat);
 
@@ -76,9 +77,77 @@ namespace Simmetric.IO.Csv.Test
             Assert.AreEqual(expectedHeaderThree, reader.Format.Headers.ElementAt(2));
         }
 
+        [TestMethod]
+        public void ReadLineGeneric_HasHeaders_ReturnsPopulatedObject()
+        {
+            var csvFormat = CsvFormat.Default;
+            SetupReader(
+                "myInt;myDouble;myString;myDateTime\n1;2.3;some text;2018-01-01 12:34" + (char)3
+                );
+            var reader = GetReader(csvFormat);
+
+            var result = reader.ReadLine<GenericTestClass>();
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.myInt);
+            Assert.AreEqual(2.3, result.myDouble);
+            Assert.AreEqual("some text", result.myString);
+            Assert.AreEqual(new DateTime(2018, 1, 1, 12, 34, 0), result.myDateTime);
+        }
+
+        [TestMethod]
+        public void ReadToEnd_MultipleLines_ReturnsMultipleLines()
+        {
+            SetupReader("1;2;3;4\n1;2;3;4\n1;2;3;4" + (char)3);
+            var reader = GetReader(CsvFormat.DefaultNoHeaders);
+
+            var result = reader.ReadToEnd();
+            var count = 0;
+            foreach(var item in result)
+            {
+                count++;
+                CollectionAssert.AreEqual(
+                    new List<string>
+                    {
+                        "1",
+                        "2",
+                        "3",
+                        "4"
+                    },
+                    item.ToList());
+            }
+
+            Assert.AreEqual(3, count);
+        }
+
+        [TestMethod]
+        public void ReadToEndGeneric_MultipleLines_ReturnsMultipleObjects()
+        {
+            SetupReader(
+                "myInt;myDouble;myString;myDateTime\n1;2.3;some text;2018-01-01 12:34\n1;2.3;some text;2018-01-01 12:34" + (char)3
+                );
+            var reader = GetReader(CsvFormat.Default);
+            var expectedResult = new GenericTestClass
+            {
+                myInt = 1,
+                myDouble = 2.3,
+                myString = "some text",
+                myDateTime = new DateTime(2018, 1, 1, 12, 34, 00)
+            };
+
+            var result = reader.ReadToEnd<GenericTestClass>();
+            var count = 0;
+            foreach(var item in result)
+            {
+                count++;
+                Assert.AreEqual(expectedResult, item);
+            }
+            Assert.AreEqual(2, count);
+        }
+
         private void SetupReader(string contentToReturn)
         {
-            underlyingReader.Peek().Returns(1);
+            underlyingReader.Peek().Returns(1); //it's hard to have Peek() return -1 when Read() has finished its run, so instead there is a delimiter at the end of every CSV literal
             underlyingReader.Read().Returns(contentToReturn.First(), contentToReturn.Substring(1).ToCharArray().Select(c => (int) c).ToArray());
             underlyingReader.ReadAsync(Arg.Any<char[]>(), Arg.Any<int>(), Arg.Any<int>()).Returns(contentToReturn.First(), contentToReturn.Substring(1).ToCharArray().Select(c => (int)c).ToArray());
         }
