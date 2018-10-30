@@ -72,8 +72,7 @@ namespace Simmetric.IO.Csv.Test
             var csvProc = GetRecordWiseProcessor();
             csvProc.ProcessCsv(documentName, fieldsToWrite, format);
 
-            string message = null;
-            recordHandler.Received(1).ProcessRecord(Arg.Any<int>(), Arg.Any<IEnumerable<string>>(), out message);
+            recordHandler.Received(1).ProcessRecord(Arg.Any<int>(), Arg.Any<IEnumerable<string>>(), out string message);
         }
 
         [TestMethod]
@@ -106,8 +105,7 @@ namespace Simmetric.IO.Csv.Test
             var csvProc = GetSetWiseProcessor();
             csvProc.ProcessCsv(documentName, fieldsToWrite, format, setSize);
 
-            IEnumerable<string> messages = null;
-            setHandler.Received(2).ProcessRecordSet(Arg.Is<IEnumerable<IEnumerable<string>>>(list => list.Count() == expectedSets), out messages);
+            setHandler.Received(2).ProcessRecordSet(Arg.Is<IEnumerable<IEnumerable<string>>>(list => list.Count() == expectedSets), out IEnumerable<string> messages);
         }
 
         private CsvProcessor GetBasicProcessor()
@@ -127,15 +125,13 @@ namespace Simmetric.IO.Csv.Test
 
         private void SetupRecordHandlerForRecordError()
         {
-            string message = null;
-            recordHandler.ProcessRecord(Arg.Any<int>(), Arg.Any<IEnumerable<string>>(), out message)
+            recordHandler.ProcessRecord(Arg.Any<int>(), Arg.Any<IEnumerable<string>>(), out string message)
                 .Returns(func => { throw new InvalidOperationException("This record throws an exception"); });
         }
 
         private void SetupSetHandlerForRecordError()
         {
-            IEnumerable<string> messages = null;
-            setHandler.ProcessRecordSet(Arg.Any<IEnumerable<IEnumerable<string>>>(), out messages)
+            setHandler.ProcessRecordSet(Arg.Any<IEnumerable<IEnumerable<string>>>(), out IEnumerable<string> messages)
                 .Returns(func => { throw new InvalidOperationException("This set throws an exception"); });
         }
     }

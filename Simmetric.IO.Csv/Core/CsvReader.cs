@@ -103,17 +103,18 @@ namespace Simmetric.IO.Csv
             {
                 foreach (var header in Format.Headers)
                 {
+                    var headerClean = header.Replace(" ", string.Empty).Replace("/", string.Empty);
                     Type currentType = null;
                     FieldInfo field = null;
                     PropertyInfo property = null;
-                    if (fields.Any(f => f.Name.Equals(header, StringComparison.InvariantCultureIgnoreCase)))
+                    if (fields.Any(f => f.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        field = fields.Single(f => f.Name.Equals(header, StringComparison.InvariantCultureIgnoreCase));
+                        field = fields.Single(f => f.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase));
                         currentType = field.FieldType;
                     }
-                    else if (props.Any(p => p.Name.Equals(header, StringComparison.InvariantCultureIgnoreCase)))
+                    else if (props.Any(p => p.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        property = props.Single(p => p.Name.Equals(header, StringComparison.InvariantCultureIgnoreCase));
+                        property = props.Single(p => p.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase));
                         currentType = property.PropertyType;
                     }
 
