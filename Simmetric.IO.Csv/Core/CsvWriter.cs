@@ -32,7 +32,7 @@ namespace Simmetric.IO.Csv
             {
                 if (this.Format.Headers == null)
                 {
-                    throw new InvalidOperationException("CsvFormat.Headers must be filled when CsvFormat.HasHeaders is true");
+                    throw new InvalidOperationException($"{nameof(CsvFormat.Headers)} must be filled when {nameof(CsvFormat.HasHeaders)} is true");
                 }
 
                 WriteLine(this.Format.Headers);

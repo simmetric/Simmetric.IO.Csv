@@ -99,6 +99,7 @@ namespace Simmetric.IO.Csv
             var fields = type.GetFields();
             var props = type.GetProperties();
             var result = new T();
+
             if (Format.HasHeaders)
             {
                 foreach (var header in Format.Headers)
@@ -127,6 +128,17 @@ namespace Simmetric.IO.Csv
                     {
                         property.SetValue(result, value);
                     }
+                }
+            }
+            else
+            {
+                foreach (var field in fields)
+                {
+                    field.SetValue(result, GetValue(field.FieldType));
+                }
+                foreach (var property in props)
+                {
+                    property.SetValue(result, GetValue(property.PropertyType));
                 }
             }
 
