@@ -1,10 +1,10 @@
-﻿using System;
-using System.Linq;
-
-namespace Simmetric.IO.Csv
+﻿namespace Simmetric.IO.Csv
 {
     using System.Collections.Generic;
     using System.Globalization;
+    using System;
+    using System.Linq;
+
 
     /// <summary>
     /// Describes formatting rules for a CSV document.
@@ -47,7 +47,7 @@ namespace Simmetric.IO.Csv
         /// <returns></returns>
         public bool ContainsSeparators(string input)
         {
-            if(string.IsNullOrEmpty(input))
+            if (string.IsNullOrEmpty(input))
             {
                 return false;
             }
@@ -68,6 +68,11 @@ namespace Simmetric.IO.Csv
         };
 
         /// <summary>
+        /// Creates a format with ColumnSeparator=; LineSeparator=NewLine TextQualifier=" HasHeaders=true
+        /// </summary>
+        public static CsvFormat SemicolonSeparatedWithHeaders => Default;
+
+        /// <summary>
         /// Creates a format with ColumnSeparator=; LineSeparator=NewLine TextQualifier=" HasHeaders=false
         /// </summary>
         public static CsvFormat DefaultNoHeaders => new CsvFormat
@@ -76,8 +81,65 @@ namespace Simmetric.IO.Csv
             Culture = CultureInfo.InvariantCulture,
             LineSeparator = Environment.NewLine,
             TextQualifier = '"',
-            TextQualification = TextQualificationOption.OnlyWhenNecessary ,
+            TextQualification = TextQualificationOption.OnlyWhenNecessary,
             HasHeaders = false
+        };
+
+        /// <summary>
+        /// Creates a format with ColumnSeparator=; LineSeparator=NewLine TextQualifier=" HasHeaders=false
+        /// </summary>
+        public static CsvFormat SemicolonSeparatedNoHeaders => DefaultNoHeaders;
+
+        /// <summary>
+        /// Comma separated values, without headers. Text delimited with double quote (")
+        /// </summary>
+        public static CsvFormat CsvNoHeaders => new CsvFormat
+        {
+            ColumnSeparator = ',',
+            LineSeparator = Environment.NewLine,
+            TextQualification = TextQualificationOption.OnlyWhenNecessary,
+            TextQualifier = '"',
+            Culture = CultureInfo.InvariantCulture,
+            HasHeaders = false
+        };
+
+        /// <summary>
+        /// Comma separated values, with headers. Text delimited with double quote (")
+        /// </summary>
+        public static CsvFormat CsvWithHeaders => new CsvFormat
+        {
+            ColumnSeparator = ',',
+            LineSeparator = Environment.NewLine,
+            TextQualification = TextQualificationOption.OnlyWhenNecessary,
+            TextQualifier = '"',
+            Culture = CultureInfo.InvariantCulture,
+            HasHeaders = true
+        };
+
+        /// <summary>
+        /// Tab separated values, without headers. Text delimited with double quote (")
+        /// </summary>
+        public static CsvFormat TsvNoHeaders => new CsvFormat
+        {
+            ColumnSeparator = '\t',
+            LineSeparator = Environment.NewLine,
+            TextQualification = TextQualificationOption.OnlyWhenNecessary,
+            TextQualifier = '"',
+            Culture = CultureInfo.InvariantCulture,
+            HasHeaders = false
+        };
+
+        /// <summary>
+        /// Tab separated values, with headers. Text delimited with double quote (")
+        /// </summary>
+        public static CsvFormat TsvWithHeaders => new CsvFormat
+        {
+            ColumnSeparator = '\t',
+            LineSeparator = Environment.NewLine,
+            TextQualification = TextQualificationOption.OnlyWhenNecessary,
+            TextQualifier = '"',
+            Culture = CultureInfo.InvariantCulture,
+            HasHeaders = true
         };
 
         /// <summary>
@@ -87,7 +149,7 @@ namespace Simmetric.IO.Csv
         /// <returns></returns>
         public static bool ContainsText(string input)
         {
-            if(string.IsNullOrEmpty(input))
+            if (string.IsNullOrEmpty(input))
             {
                 return false;
             }

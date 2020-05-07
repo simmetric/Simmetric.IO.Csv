@@ -1,8 +1,8 @@
 # Simmetric.IO.Csv
-.NET library for handling CSV files in all formats.
+.NET library for handling CSV files in various formats, including TSV, .
 
 ## Why a CSV library?
-I'm sure we've all written a `while (streamReader.ReadLine()) { }` loop a million times thinking 'CSV is easy!' and then it always turned out to be more complicated than expected.
+I'm sure we've all written a `while (streamReader.ReadLine()) { }` loop a million times thinking 'CSV is easy!' and then it always turned out to be more complicated than expected, often due to text delimiters.
 Different separator characters, date and number formats can be a real pain, not to mention when a CSV file contains quoted text strings that may or may not contain separator characters. In that case you need more than a ReadLine() loop.
 
 Simmetric.IO.Csv offers basic classes to read and write CSV, but also a fully functional scaffold that minimizes the code you have to write. You only have to write a class that implements ICsvRecordHandler (or ICsvSetHandler to handle more than 1 record at once) and fill in the gaps.

@@ -1,11 +1,8 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
-
-namespace Simmetric.IO.Csv.Test
+﻿namespace Simmetric.IO.Csv.Test
 {
-    using System.Text;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using NSubstitute;
+    using System.IO;
 
     [TestClass]
     public class CsvWriterTests

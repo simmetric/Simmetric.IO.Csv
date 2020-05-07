@@ -1,13 +1,12 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
-
-namespace Simmetric.IO.Csv.Test
+﻿namespace Simmetric.IO.Csv.Test
 {
-    using System.Collections.Generic;
-    using System.Linq;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using NSubstitute;
     using Simmetric.IO.Csv.Test.Class;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
 
     [TestClass]
     public class CsvReaderTests

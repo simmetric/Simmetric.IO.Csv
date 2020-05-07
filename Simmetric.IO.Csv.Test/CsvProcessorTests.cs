@@ -1,11 +1,10 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
-
-namespace Simmetric.IO.Csv.Test
+﻿namespace Simmetric.IO.Csv.Test
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NSubstitute;
 
     [TestClass]
     public class CsvProcessorTests
@@ -36,7 +35,7 @@ namespace Simmetric.IO.Csv.Test
         }
 
         [TestMethod]
-        public void ProcessCsv_Basic_CallsEndProcessing()
+        public void ProcessCsv_BasicHandler_CallsEndProcessing()
         {
             var format = CsvFormat.DefaultNoHeaders;
             var documentName = "Testcase RecordWise";

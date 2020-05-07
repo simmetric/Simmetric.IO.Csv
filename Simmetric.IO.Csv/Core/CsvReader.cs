@@ -77,7 +77,7 @@ namespace Simmetric.IO.Csv
         }
 
         /// <summary>
-        /// Reads until the end of the CSV file and returns all lines as a nested IEnumerable<string>
+        /// Reads until the end of the CSV file and returns all lines as a nested IEnumerable&lt;string&gt;
         /// </summary>
         /// <returns></returns>
         public IEnumerable<IEnumerable<string>> ReadToEnd()
