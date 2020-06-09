@@ -13,7 +13,7 @@ namespace Simmetric.IO.Csv
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="headers"></param>
-        void BeginProcessing(string fileName, IEnumerable<string> headers);
+        void BeginProcessing(string fileName, IEnumerable<string?>? headers);
         /// <summary>
         /// Called when processing of a file, stream or string has ended
         /// </summary>
@@ -38,7 +38,7 @@ namespace Simmetric.IO.Csv
         /// <param name="fields">All fields of the record as a string enumerable</param>
         /// <param name="message"></param>
         /// <returns></returns>
-        bool ProcessRecord(int recordNumber, IEnumerable<string> fields, out string message);
+        bool ProcessRecord(int recordNumber, IEnumerable<string?> fields, out string message);
     }
 
     /// <summary>
@@ -52,6 +52,6 @@ namespace Simmetric.IO.Csv
         /// <param name="records">A multidimensional array where the first dimension is the record index, and the second dimension is the column index</param>
         /// <param name="messages"></param>
         /// <returns></returns>
-        bool ProcessRecordSet(IEnumerable<IEnumerable<string>> records, out IEnumerable<string> messages);
+        bool ProcessRecordSet(IEnumerable<IEnumerable<string?>> records, out IEnumerable<string> messages);
     }
 }
