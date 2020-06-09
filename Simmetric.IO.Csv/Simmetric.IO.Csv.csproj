@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net47;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net45;net47;netstandard2.0;netstandard2.1</TargetFrameworks>
     <LangVersion>8.0</LangVersion>
     <!-- version numbers will be updated by build -->
-    <AssemblyVersion>1.3.0.0</AssemblyVersion>
-    <FileVersion>1.3.0</FileVersion>
-    <VersionPrefix>1.0.1</VersionPrefix>
-    <VersionSuffix>beta2</VersionSuffix>
+    <AssemblyVersion>1.3.1.0</AssemblyVersion>
+    <FileVersion>1.3.1</FileVersion>
+    <VersionPrefix>1.3.1</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
     <Authors>Simon Strijbos</Authors>
     <Company>Simmetric</Company>
     <Product>Simmetric.IO.Csv</Product>
@@ -18,7 +18,7 @@ Supports custom line and record separators, various text delimiting strategies, 
     <NeutralLanguage>en-US</NeutralLanguage>
     <Title>Simmetric.IO.Csv</Title>
     <PackageId>Simmetric.IO.Csv</PackageId>
-    <PackageTags>csv,tsv</PackageTags>
+    <PackageTags>csv,tsv,comma,separated,values</PackageTags>
     <PackageProjectUrl>https://github.com/simmetric/Simmetric.IO.Csv</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -30,7 +30,7 @@ Supports custom line and record separators, various text delimiting strategies, 
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.3.0</Version>
+    <Version>1.3.1</Version>
     <RepositoryUrl>https://github.com/simmetric/Simmetric.IO.Csv</RepositoryUrl>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
