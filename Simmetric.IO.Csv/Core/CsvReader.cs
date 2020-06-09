@@ -18,7 +18,7 @@ namespace Simmetric.IO.Csv
         bool endOfStream = false;
 
         //internals
-        TextReader reader;
+        TextReader? reader;
 
         /// <summary>
         /// Gets the format used to read the CSV document
@@ -55,7 +55,12 @@ namespace Simmetric.IO.Csv
             }
         }
 
-        public CsvReader(Stream stream, CsvFormat format):this(new StreamReader(stream), format)
+        /// <summary>
+        /// Instantiates a new CSV reader for the given stream, which must be formatted according to the given CSV format.
+        /// </summary>
+        /// <param name="stream">The input stream containing a CSV formatted document, will be converted to StreamReader</param>
+        /// <param name="format">Describes the format of the CSV document in the stream</param>
+        public CsvReader(Stream stream, CsvFormat format) : this(new StreamReader(stream), format)
         {
             //empty constructor for backwards compatibiltiy, inherits this(TextWriter, CsvFormat)
         }
@@ -63,10 +68,10 @@ namespace Simmetric.IO.Csv
         /// <summary>
         /// Reads the next line and returns the field values as a <see cref="T:System.String[]"/>
         /// </summary>
-        /// <returns></returns>
-        public IEnumerable<string> ReadLine()
+        /// <returns>An enumerable of field values of one line as strings</returns>
+        public IEnumerable<string?> ReadLine()
         {
-            List<string> fields = new List<string>();
+            List<string?> fields = new List<string?>();
             var lineToRead = LinePosition;
             while (!EndOfStream && LinePosition == lineToRead)
             {
@@ -79,8 +84,8 @@ namespace Simmetric.IO.Csv
         /// <summary>
         /// Reads until the end of the CSV file and returns all lines as a nested IEnumerable&lt;string&gt;
         /// </summary>
-        /// <returns></returns>
-        public IEnumerable<IEnumerable<string>> ReadToEnd()
+        /// <returns>An enumerable of field values of all lines as strings</returns>
+        public IEnumerable<IEnumerable<string?>> ReadToEnd()
         {
             while (!EndOfStream)
             {
@@ -91,8 +96,8 @@ namespace Simmetric.IO.Csv
         /// <summary>
         /// Reads the next line and uses it to populate a new instance of class T
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <typeparam name="T">The type to which the line will be converted</typeparam>
+        /// <returns>One line as a strong typed object</returns>
         public T ReadLine<T>() where T : new()
         {
             var type = typeof(T);
@@ -100,25 +105,21 @@ namespace Simmetric.IO.Csv
             var props = type.GetProperties();
             var result = new T();
 
-            if (Format.HasHeaders)
+            if (Format.HasHeaders && Format.Headers != null)
             {
                 foreach (var header in Format.Headers)
                 {
-                    var headerClean = header.Replace(" ", string.Empty).Replace("/", string.Empty);
-                    Type currentType = null;
-                    FieldInfo field = null;
-                    PropertyInfo property = null;
-                    if (fields.Any(f => f.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase)))
+                    var headerClean = header?.Replace(" ", string.Empty).Replace("/", string.Empty);
+
+                    FieldInfo field = fields.SingleOrDefault(f => f.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase));
+                    PropertyInfo property = props.SingleOrDefault(p => p.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase));
+
+                    if (field == null && property == null)
                     {
-                        field = fields.Single(f => f.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase));
-                        currentType = field.FieldType;
-                    }
-                    else if (props.Any(p => p.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase)))
-                    {
-                        property = props.Single(p => p.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase));
-                        currentType = property.PropertyType;
+                        continue;
                     }
 
+                    Type currentType = field != null ? field.FieldType : property.PropertyType;
                     var value = GetValue(currentType);
                     if (field != null)
                     {
@@ -145,7 +146,7 @@ namespace Simmetric.IO.Csv
             return result;
         }
 
-        private object GetValue(Type currentType)
+        private object? GetValue(Type currentType)
         {
             switch (Type.GetTypeCode(currentType))
             {
@@ -173,7 +174,8 @@ namespace Simmetric.IO.Csv
         /// <summary>
         /// Reads until the end of the CSV file and returns all lines as an IEnumerable of type T
         /// </summary>
-        /// <returns></returns>
+        /// <typeparam name="T">The type to which each line will be converted</typeparam>
+        /// <returns>All lines as an enumerable of strong typed object</returns>
         public IEnumerable<T> ReadToEnd<T>() where T : new()
         {
             while (!EndOfStream)
@@ -186,12 +188,12 @@ namespace Simmetric.IO.Csv
         /// Reads the next field from the stream, without text qualifiers or separators
         /// </summary>
         /// <returns>The field value as <see cref="T:System.String"/></returns>
-        public string Read()
+        public string? Read()
         {
             var cache = new StringBuilder();
             char currentChar;
             isInText = false;
-            string field = null;
+            string? field = null;
             bool foundLineSeparator = false;
 
             while (!EndOfStream)
@@ -212,7 +214,7 @@ namespace Simmetric.IO.Csv
                 {
                     //when not inText and a line separator char is found, the end of the field and line is reached
                     //skip all following line separators
-                    while (!EndOfStream && Format.LineSeparator.Contains((char)reader.Peek()))
+                    while (!EndOfStream && reader != null && Format.LineSeparator.Contains((char)reader.Peek()))
                     {
                         ReadChar();
                     }
@@ -333,6 +335,10 @@ namespace Simmetric.IO.Csv
         /// <returns>The next <see cref="T:System.Char"/> in the stream</returns>
         private char ReadChar()
         {
+            if (reader == null)
+            {
+                throw new InvalidOperationException($"{nameof(reader)} was null");
+            }
             return (char)reader.Read();
         }
 

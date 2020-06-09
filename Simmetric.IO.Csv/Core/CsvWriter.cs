@@ -16,7 +16,7 @@ namespace Simmetric.IO.Csv
         /// </summary>
         public CsvFormat Format { get; protected set; }
         //Stream target;
-        TextWriter writer;
+        TextWriter? writer;
 
         /// <summary>
         /// Instantiates a CSV writer class to write the specified format to the specified stream.
@@ -38,7 +38,11 @@ namespace Simmetric.IO.Csv
                 WriteLine(this.Format.Headers);
             }
         }
-
+        /// <summary>
+        /// Instantiates a CSV writer class to write the specified format to the specified stream.
+        /// </summary>
+        /// <param name="format">The CSV format</param>
+        /// <param name="stream">The stream that receives output, will be wrapped in a StreamWriter</param>
         public CsvWriter(Stream stream, CsvFormat format) : this(new StreamWriter(stream), format)
         {
             //empty constructor for backwards compatibiltiy, inherits this(TextWriter, CsvFormat)
@@ -48,7 +52,7 @@ namespace Simmetric.IO.Csv
         /// Writes the given set of fields to a CSV formatted line.
         /// </summary>
         /// <param name="line">Non-formatted, raw field values</param>
-        public void WriteLine(IEnumerable<string> line)
+        public void WriteLine(IEnumerable<string?> line)
         {
             if (line == null)
             {
@@ -72,7 +76,10 @@ namespace Simmetric.IO.Csv
         /// </summary>
         public void WriteLineSeparator()
         {
-
+            if (writer == null)
+            {
+                throw new InvalidOperationException($"{nameof(writer)} was null");
+            }
             this.writer.Write(this.Format.LineSeparator);
         }
 
@@ -81,6 +88,10 @@ namespace Simmetric.IO.Csv
         /// </summary>
         public void WriteColumnSeparator()
         {
+            if (writer == null)
+            {
+                throw new InvalidOperationException($"{nameof(writer)} was null");
+            }
             this.writer.Write(this.Format.ColumnSeparator);
         }
 
@@ -88,15 +99,19 @@ namespace Simmetric.IO.Csv
         /// Writes a field value to the stream
         /// </summary>
         /// <param name="field"></param>
-        public void WriteField(string field)
+        public void WriteField(string? field)
         {
-            if(string.IsNullOrEmpty(field))
+            if (writer == null)
             {
-                throw new ArgumentNullException(nameof(field));
+                throw new InvalidOperationException($"{nameof(writer)} was null");
             }
 
             //verify if text qualifiers must be added
-            if (this.Format.TextQualifier.HasValue)
+            if (field == null)
+            {
+                this.writer.Write(string.Empty);
+            }
+            else if (this.Format.TextQualifier.HasValue)
             {
                 //remove text qualifiers from field
                 field = field.Replace(this.Format.TextQualifier.Value, '\0');
@@ -104,8 +119,8 @@ namespace Simmetric.IO.Csv
                 //write value
                 //if selected TextQualificationOption applies, wrap in text qualifier
                 if (
-                    this.Format.TextQualification == CsvFormat.TextQualificationOption.ForAllFields || 
-                    (this.Format.TextQualification == CsvFormat.TextQualificationOption.OnlyWhenNecessary && this.Format.ContainsSeparators(field)) || 
+                    this.Format.TextQualification == CsvFormat.TextQualificationOption.ForAllFields ||
+                    (this.Format.TextQualification == CsvFormat.TextQualificationOption.OnlyWhenNecessary && this.Format.ContainsSeparators(field)) ||
                     (this.Format.TextQualification == CsvFormat.TextQualificationOption.ForTextFields && (CsvFormat.ContainsText(field) || this.Format.ContainsSeparators(field))))
                 {
                     this.writer.Write(this.Format.TextQualifier.Value);
@@ -124,6 +139,10 @@ namespace Simmetric.IO.Csv
         /// </summary>
         public void Flush()
         {
+            if (writer == null)
+            {
+                throw new InvalidOperationException($"{nameof(writer)} was null");
+            }
             this.writer.Flush();
         }
 
@@ -132,6 +151,10 @@ namespace Simmetric.IO.Csv
         /// </summary>
         public void Close()
         {
+            if (writer == null)
+            {
+                throw new InvalidOperationException($"{nameof(writer)} was null");
+            }
             this.writer.Close();
         }
 
@@ -149,7 +172,7 @@ namespace Simmetric.IO.Csv
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            if(disposing)
+            if (disposing)
             {
                 if (this.writer != null)
                 {
