@@ -18,7 +18,7 @@
         /// <summary>
         /// The character(s) used to separate lines
         /// </summary>
-        public string LineSeparator { get; set; }
+        public string LineSeparator { get; set; } = string.Empty;
         /// <summary>
         /// The optional character used to mark a field as text
         /// </summary>
@@ -34,11 +34,11 @@
         /// <summary>
         /// If HasHeaders = true, then this property will contain the headers for the CSV file. Automatically filled by <see cref="Simmetric.IO.Csv.CsvReader"/>
         /// </summary>
-        public IEnumerable<string> Headers { get; set; }
+        public IEnumerable<string?>? Headers { get; set; }
         /// <summary>
         /// Culture used in the CSV document
         /// </summary>
-        public CultureInfo Culture { get; set; }
+        public CultureInfo Culture { get; set; } = CultureInfo.InvariantCulture;
 
         /// <summary>
         /// Returns true if the given input returns a line or column separator character
@@ -149,13 +149,12 @@
         /// <returns></returns>
         public static bool ContainsText(string input)
         {
-            if (string.IsNullOrEmpty(input))
+            if (string.IsNullOrWhiteSpace(input))
             {
                 return false;
             }
 
-            decimal parsedDecimal;
-            return decimal.TryParse(input, out parsedDecimal);
+            return input.Trim().Any(c => char.IsLetter(c) || char.IsWhiteSpace(c));
         }
 
         /// <summary>
