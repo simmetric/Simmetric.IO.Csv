@@ -28,13 +28,6 @@ steps:
   inputs:
     command: 'test'
     projects: 'Simmetric.IO.Csv.Test/Simmetric.IO.Csv.Test.csproj'
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'restore'
-    projects: |
-      Simmetric.IO.Csv/Simmetric.IO.Csv.csproj
-      Simmetric.IO.Csv.Test/Simmetric.IO.Csv.Test.csproj
-    feedsToUse: 'select'
     arguments: '--no-build --nologo -c $(BuildConfiguration) --collect "Code coverage"'
 
 - task: DotNetCoreCLI@2
