@@ -1,3 +1,6 @@
+variables:
+  buildConfiguration: Release
+
 trigger:
 - master
 
@@ -21,14 +24,14 @@ steps:
     projects: |
       Simmetric.IO.Csv/Simmetric.IO.Csv.csproj
       Simmetric.IO.Csv.Test/Simmetric.IO.Csv.Test.csproj
-    arguments: '--no-restore -c $(BuildConfiguration)'
+    arguments: '--no-restore -c $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
   displayName: dotnet test
   inputs:
     command: 'test'
     projects: 'Simmetric.IO.Csv.Test/Simmetric.IO.Csv.Test.csproj'
-    arguments: '--no-build --nologo -c $(BuildConfiguration) --collect "Code coverage"'
+    arguments: '--no-build --nologo -c $(buildConfiguration) --collect "Code coverage"'
 
 - task: DotNetCoreCLI@2
   displayName: dotnet pack
@@ -38,4 +41,4 @@ steps:
     nobuild: true
     includesymbols: true
     versioningScheme: 'off'
-    buildProperties: '-c $(BuildConfiguration)'
+    buildProperties: '-c $(buildConfiguration)'
