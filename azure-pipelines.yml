@@ -38,7 +38,7 @@ steps:
   inputs:
     command: 'pack'
     packagesToPack: 'Simmetric.IO.Csv/Simmetric.IO.Csv.csproj'
+    configuration: '$(buildConfiguration)'
     nobuild: true
     includesymbols: true
     versioningScheme: 'off'
-    buildProperties: '-c $(buildConfiguration)'
