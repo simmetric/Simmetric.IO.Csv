@@ -6,6 +6,7 @@ pool:
 
 steps:
 - task: DotNetCoreCLI@2
+  displayName: dotnet restore
   inputs:
     command: 'restore'
     projects: |
@@ -14,6 +15,7 @@ steps:
     feedsToUse: 'select'
 
 - task: DotNetCoreCLI@2
+  displayName: dotnet build
   inputs:
     command: 'build'
     projects: |
@@ -22,15 +24,25 @@ steps:
     arguments: '--no-restore -c $(BuildConfiguration)'
 
 - task: DotNetCoreCLI@2
+  displayName: dotnet test
   inputs:
     command: 'test'
     projects: 'Simmetric.IO.Csv.Test/Simmetric.IO.Csv.Test.csproj'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'restore'
+    projects: |
+      Simmetric.IO.Csv/Simmetric.IO.Csv.csproj
+      Simmetric.IO.Csv.Test/Simmetric.IO.Csv.Test.csproj
+    feedsToUse: 'select'
     arguments: '--no-build --nologo -c $(BuildConfiguration) --collect "Code coverage"'
 
 - task: DotNetCoreCLI@2
+  displayName: dotnet pack
   inputs:
     command: 'pack'
     packagesToPack: 'Simmetric.IO.Csv/Simmetric.IO.Csv.csproj'
     nobuild: true
     includesymbols: true
     versioningScheme: 'off'
+    buildProperties: '-c $(BuildConfiguration)'
