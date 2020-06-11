@@ -1,0 +1,36 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'restore'
+    projects: |
+      Simmetric.IO.Csv/Simmetric.IO.Csv.csproj
+      Simmetric.IO.Csv.Test/Simmetric.IO.Csv.Test.csproj
+    feedsToUse: 'select'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    projects: |
+      Simmetric.IO.Csv/Simmetric.IO.Csv.csproj
+      Simmetric.IO.Csv.Test/Simmetric.IO.Csv.Test.csproj
+    arguments: '--no-restore -c $(BuildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'test'
+    projects: 'Simmetric.IO.Csv.Test/Simmetric.IO.Csv.Test.csproj'
+    arguments: '--no-build --nologo -c $(BuildConfiguration) --collect "Code coverage"'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'pack'
+    packagesToPack: 'Simmetric.IO.Csv/Simmetric.IO.Csv.csproj'
+    nobuild: true
+    includesymbols: true
+    versioningScheme: 'off'
