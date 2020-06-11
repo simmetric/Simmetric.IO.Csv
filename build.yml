@@ -31,7 +31,7 @@ steps:
   inputs:
     command: 'test'
     projects: 'Simmetric.IO.Csv.Test/Simmetric.IO.Csv.Test.csproj'
-    arguments: '--no-build --nologo -c $(buildConfiguration) --collect "Code coverage"'
+    arguments: '--no-build --nologo -c $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
 
 - task: DotNetCoreCLI@2
   displayName: dotnet pack
@@ -42,3 +42,10 @@ steps:
     nobuild: true
     includesymbols: true
     versioningScheme: 'off'
+
+- task: PublishCodeCoverageResults@1
+  displayName: publish coverage results
+  inputs:
+    codeCoverageTool: 'Cobertura'
+    summaryFileLocation: '**/coverage.*.cobertura.xml'
+    failIfCoverageEmpty: true

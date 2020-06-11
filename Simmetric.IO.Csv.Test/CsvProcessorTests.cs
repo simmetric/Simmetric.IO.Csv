@@ -70,8 +70,7 @@
 
             var csvProc = GetRecordWiseProcessor();
             csvProc.ProcessCsv(documentName, fieldsToWrite, format);
-
-            recordHandler.Received(1).ProcessRecord(Arg.Any<int>(), Arg.Any<IEnumerable<string>>(), out string message);
+            recordHandler.Received(1).ProcessRecord(Arg.Any<int>(), Arg.Any<IEnumerable<string>>(), out _);
         }
 
         [TestMethod]
