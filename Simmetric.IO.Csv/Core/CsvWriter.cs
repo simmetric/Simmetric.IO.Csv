@@ -127,6 +127,10 @@ namespace Simmetric.IO.Csv
                     this.writer.Write(field);
                     this.writer.Write(this.Format.TextQualifier.Value);
                 }
+                else
+                {
+                    this.writer.Write(field);
+                }
             }
             else
             {

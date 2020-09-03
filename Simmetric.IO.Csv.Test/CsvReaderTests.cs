@@ -28,7 +28,7 @@
             var expectedLineTwoFieldOne = "TwoOne";
             var expectedLineTwoFieldTwo = "TwoTwo";
             //default formatting
-            var csvFormat = CsvFormat.DefaultNoHeaders;
+            var csvFormat = CsvFormat.SemicolonSeparatedNoHeaders;
             csvFormat.LineSeparator = "\n";
             SetupReader(input);
 
@@ -46,7 +46,7 @@
         [TestMethod]
         public void ReadAsType_AllTypes_CorrectTypeConversion()
         {
-            var csvFormat = CsvFormat.DefaultNoHeaders;
+            var csvFormat = CsvFormat.SemicolonSeparatedNoHeaders;
             SetupReader("1;2.222;3.333;2004-04-04 04:44:44;true" + (char)3);
 
             var reader = GetReader(csvFormat);
@@ -61,7 +61,7 @@
         [TestMethod]
         public void Constructor_HasHeaders_ExtractsHeadersCorrectly()
         {
-            var csvFormat = CsvFormat.Default;
+            var csvFormat = CsvFormat.SemicolonSeparatedWithHeaders;
             var csvContent = "Header1;Header2;Header3" + Environment.NewLine;
             var expectedHeaderOne = "Header1";
             var expectedHeaderTwo = "Header2";
@@ -79,7 +79,7 @@
         [TestMethod]
         public void ReadLineGeneric_HasHeaders_ReturnsPopulatedObject()
         {
-            var csvFormat = CsvFormat.Default;
+            var csvFormat = CsvFormat.SemicolonSeparatedWithHeaders;
             SetupReader(
                 "myInt;myDouble;myString;myDateTime;myIntProperty;myNullableIntProperty\n1;2.3;some text;2018-01-01 12:34;5;" + (char)3
                 );
@@ -91,8 +91,8 @@
             Assert.AreEqual(1, result.myInt);
             Assert.AreEqual(2.3, result.myDouble);
             Assert.AreEqual("some text", result.myString);
-            Assert.AreEqual(5, result.myIntProperty);
-            Assert.AreEqual(null, result.myNullableIntProperty);
+            Assert.AreEqual(5, result.MyIntProperty);
+            Assert.AreEqual(null, result.MyNullableIntProperty);
             Assert.AreEqual(new DateTime(2018, 1, 1, 12, 34, 0), result.myDateTime);
         }
 
@@ -100,7 +100,7 @@
         public void ReadToEnd_MultipleLines_ReturnsMultipleLines()
         {
             SetupReader("1;2;3;4\n1;2;3;4\n1;2;3;4" + (char)3);
-            var reader = GetReader(CsvFormat.DefaultNoHeaders);
+            var reader = GetReader(CsvFormat.SemicolonSeparatedNoHeaders);
 
             var result = reader.ReadToEnd();
             var count = 0;
@@ -127,15 +127,15 @@
             SetupReader(
                 "myInt;myDouble;myString;myDateTime;myIntProperty;myNullableIntProperty\n1;2.3;some text;2018-01-01 12:34;5;null\n1;2.3;some text;2018-01-01 12:34;5;null" + (char)3
                 );
-            var reader = GetReader(CsvFormat.Default);
+            var reader = GetReader(CsvFormat.SemicolonSeparatedWithHeaders);
             var expectedResult = new GenericTestClass
             {
                 myInt = 1,
                 myDouble = 2.3,
                 myString = "some text",
                 myDateTime = new DateTime(2018, 1, 1, 12, 34, 00),
-                myIntProperty = 5,
-                myNullableIntProperty = null
+                MyIntProperty = 5,
+                MyNullableIntProperty = null
             };
 
             var result = reader.ReadToEnd<GenericTestClass>();

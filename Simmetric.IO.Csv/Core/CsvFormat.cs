@@ -41,20 +41,6 @@
         public CultureInfo Culture { get; set; } = CultureInfo.InvariantCulture;
 
         /// <summary>
-        /// Returns true if the given input returns a line or column separator character
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public bool ContainsSeparators(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return false;
-            }
-            return input.Contains(ColumnSeparator) || input.IndexOfAny(LineSeparator.ToCharArray()) < 0;
-        }
-
-        /// <summary>
         /// Creates a format with ColumnSeparator=; LineSeparator=NewLine TextQualifier=" HasHeaders=true
         /// </summary>
         public static CsvFormat Default => new CsvFormat
@@ -141,6 +127,20 @@
             Culture = CultureInfo.InvariantCulture,
             HasHeaders = true
         };
+
+        /// <summary>
+        /// Returns true if the given input returns a line or column separator character
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public bool ContainsSeparators(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return false;
+            }
+            return input.Contains(ColumnSeparator) || input.IndexOfAny(LineSeparator.ToCharArray()) >= 0;
+        }
 
         /// <summary>
         /// Returns true if the input string contains one or more alphabetic characters

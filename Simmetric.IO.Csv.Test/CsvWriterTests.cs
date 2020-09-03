@@ -18,7 +18,7 @@
         [TestMethod]
         public void WriteField_WriteSingleField_WritesToUnderlyingStream()
         {
-            var format = CsvFormat.DefaultNoHeaders;
+            var format = CsvFormat.SemicolonSeparatedNoHeaders;
             string fieldToWrite = "ATextField";
 
             var writer = GetWriter(format);
@@ -30,7 +30,7 @@
         [TestMethod]
         public void WriteField_ContentContainsSeparatorChar_ContentIsDelimited()
         {
-            var format = CsvFormat.DefaultNoHeaders;
+            var format = CsvFormat.SemicolonSeparatedNoHeaders;
             string fieldToWrite = "A line; with, \ndelimiters\r\n in it.";
 
             var writer = GetWriter(format);
@@ -43,7 +43,7 @@
         [TestMethod]
         public void WriteLine_MultipleFields_SeparatesFieldsCorrectly()
         {
-            CsvFormat format = CsvFormat.DefaultNoHeaders;
+            CsvFormat format = CsvFormat.SemicolonSeparatedNoHeaders;
             string[] lineToWrite = {"One", "2", "3.0", "Four", "2055-05-05"};
             var writer = GetWriter(format);
 
@@ -64,7 +64,7 @@
         public void Constructor_WithHeaders_WritesHeadersToUnderlyingStream()
         {
             string[] headersToWrite = new[] {"H1", "H2", "H3"};
-            var csvFormat = CsvFormat.Default;
+            var csvFormat = CsvFormat.SemicolonSeparatedWithHeaders;
             csvFormat.Headers = headersToWrite;
 
             GetWriter(csvFormat);
@@ -72,8 +72,8 @@
             underlyingWriter.Received(1).Write(headersToWrite[0]);
             underlyingWriter.Received(1).Write(headersToWrite[1]);
             underlyingWriter.Received(1).Write(headersToWrite[2]);
-            underlyingWriter.Received(2).Write(CsvFormat.DefaultNoHeaders.ColumnSeparator);
-            underlyingWriter.Received(1).Write(CsvFormat.DefaultNoHeaders.LineSeparator);
+            underlyingWriter.Received(2).Write(CsvFormat.SemicolonSeparatedNoHeaders.ColumnSeparator);
+            underlyingWriter.Received(1).Write(CsvFormat.SemicolonSeparatedNoHeaders.LineSeparator);
         }
 
         private CsvWriter GetWriter(CsvFormat format)

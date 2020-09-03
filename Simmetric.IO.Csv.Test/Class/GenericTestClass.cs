@@ -9,8 +9,8 @@ namespace Simmetric.IO.Csv.Test.Class
         public string myString;
         public DateTime myDateTime;
 
-        public int myIntProperty { get; set; }
-        public int? myNullableIntProperty { get; set; }
+        public int MyIntProperty { get; set; }
+        public int? MyNullableIntProperty { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -20,16 +20,13 @@ namespace Simmetric.IO.Csv.Test.Class
                     myDouble == other.myDouble &&
                     myString == other.myString &&
                     myDateTime == other.myDateTime &&
-                    myIntProperty == other.myIntProperty &&
-                    myNullableIntProperty == other.myNullableIntProperty;
+                    MyIntProperty == other.MyIntProperty &&
+                    MyNullableIntProperty == other.MyNullableIntProperty;
             }
 
             return false;
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => base.GetHashCode();
     }
 }

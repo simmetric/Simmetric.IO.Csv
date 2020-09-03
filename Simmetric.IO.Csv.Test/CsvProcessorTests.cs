@@ -5,6 +5,7 @@
     using System;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using NSubstitute;
+    using System.IO;
 
     [TestClass]
     public class CsvProcessorTests
@@ -104,6 +105,25 @@
             csvProc.ProcessCsv(documentName, fieldsToWrite, format, setSize);
 
             setHandler.Received(2).ProcessRecordSet(Arg.Is<IEnumerable<IEnumerable<string>>>(list => list.Count() == expectedSets), out IEnumerable<string> messages);
+        }
+
+        [TestMethod]
+        public void ProcessStream_FromStart_WritesToHandler()
+        {
+            const string DocumentName = "doc";
+            var format = CsvFormat.SemicolonSeparatedNoHeaders;
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.WriteLine(string.Join(new string(new char[] { format.ColumnSeparator }), "a", "b", "c"));
+            writer.Flush();
+            stream.Position = 0;
+            var sut = GetRecordWiseProcessor();
+
+            sut.ProcessStream(DocumentName, stream, format);
+
+            recordHandler.Received(1).ProcessRecord(1, Arg.Any<IEnumerable<string>>(), out string message);
+            Assert.IsNull(message);
+
         }
 
         private CsvProcessor GetBasicProcessor()
