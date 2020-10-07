@@ -62,7 +62,7 @@ namespace Simmetric.IO.Csv
         /// <param name="format">Describes the format of the CSV document in the stream</param>
         public CsvReader(Stream stream, CsvFormat format) : this(new StreamReader(stream), format)
         {
-            //empty constructor for backwards compatibiltiy, inherits this(TextWriter, CsvFormat)
+            //empty constructor for backwards compatibiltiy, inherits this(TextReader, CsvFormat)
         }
 
         /// <summary>
