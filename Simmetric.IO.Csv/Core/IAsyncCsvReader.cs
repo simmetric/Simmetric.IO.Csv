@@ -18,7 +18,7 @@ namespace Simmetric.IO.Csv.Core
         /// Reads until the end of the CSV file and returns all lines as a nested IEnumerable&lt;string&gt;
         /// </summary>
         /// <returns>An enumerable of field values of all lines as strings</returns>
-        Task<IEnumerable<IEnumerable<string?>>> ReadToEndAsync();
+        IAsyncEnumerable<IEnumerable<string?>> ReadToEndAsync();
         /// <summary>
         /// Reads the next line and uses it to populate a new instance of class T
         /// </summary>
@@ -30,7 +30,7 @@ namespace Simmetric.IO.Csv.Core
         /// </summary>
         /// <typeparam name="T">The type to which each line will be converted</typeparam>
         /// <returns>All lines as an enumerable of strong typed object</returns>
-        Task<IEnumerable<T>> ReadToEndAsync<T>() where T : new();
+        IAsyncEnumerable<T> ReadToEndAsync<T>() where T : new();
         /// <summary>
         /// Reads the next field from the stream, without text qualifiers or separators
         /// </summary>
