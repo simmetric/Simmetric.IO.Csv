@@ -2,6 +2,7 @@
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using NSubstitute;
+    using Simmetric.IO.Csv.Core;
     using Simmetric.IO.Csv.Test.Class;
     using System;
     using System.Collections.Generic;

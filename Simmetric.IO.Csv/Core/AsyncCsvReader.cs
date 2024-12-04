@@ -6,9 +6,8 @@ using System.Text;
 using System.Globalization;
 using System.Reflection;
 using System.Threading.Tasks;
-using Simmetric.IO.Csv.Core;
 
-namespace Simmetric.IO.Csv
+namespace Simmetric.IO.Csv.Core
 {
     /// <summary>
     /// Reads a CSV document from the input stream
