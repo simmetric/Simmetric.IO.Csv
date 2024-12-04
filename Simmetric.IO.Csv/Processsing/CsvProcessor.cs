@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Simmetric.IO.Csv
+namespace Simmetric.IO.Csv.Processsing
 {
     /// <summary>
     /// Parses a CSV document and feeds rows to a supplied handler object.
@@ -19,9 +19,9 @@ namespace Simmetric.IO.Csv
         public CsvProcessor(ICsvHandler handler)
         {
             this.handler = handler;
-            this.recordHandler = handler as ICsvRecordHandler;
-            this.setHandler = handler as ICsvSetHandler;
-            this.recordSet = new List<List<string?>>();
+            recordHandler = handler as ICsvRecordHandler;
+            setHandler = handler as ICsvSetHandler;
+            recordSet = new List<List<string?>>();
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Simmetric.IO.Csv
         /// <param name="documentName">A descriptive name for the processed document, for logging purposes.</param>
         /// <param name="inputStream">A CSV formatted stream containing data to be processed.</param>
         /// <param name="format">A <see cref="T:Simmetric.IO.Csv.CsvFormat"/> object representing the formatting used in the stream.</param>
-        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="Simmetric.IO.Csv.ICsvSetHandler"/> to support this.</param>
+        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="ICsvSetHandler"/> to support this.</param>
         public int ProcessStream(string documentName, Stream inputStream, CsvFormat format, int processingSetSize)
         {
             return ProcessStream(documentName, inputStream, null, format, processingSetSize, 0);
@@ -54,7 +54,7 @@ namespace Simmetric.IO.Csv
         /// <param name="inputStream">A CSV formatted stream containing data to be processed.</param>
         /// <param name="outputMessageStream">Output messages will be written to this stream.</param>
         /// <param name="format">A <see cref="T:Simmetric.IO.Csv.CsvFormat"/> object representing the formatting used in the stream.</param>
-        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="Simmetric.IO.Csv.ICsvSetHandler"/> to support this.</param>
+        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="ICsvSetHandler"/> to support this.</param>
         /// <param name="startAtRecord">The parser will skip to the record number indicated.</param>
         /// <returns>The number of rows processed</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "Recordset"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "ICsvSetHandler")]
@@ -68,7 +68,7 @@ namespace Simmetric.IO.Csv
             {
                 throw new ArgumentNullException(nameof(format));
             }
-            if (processingSetSize > 0 && this.setHandler == null)
+            if (processingSetSize > 0 && setHandler == null)
             {
                 throw new InvalidOperationException(
                     "Recordset processing cannot be used on a CSV handler that does not implement ICsvSetHandler");
@@ -104,7 +104,7 @@ namespace Simmetric.IO.Csv
             //prepare recordset for set processing
             if (processingSetSize > 0)
             {
-                this.recordSet = new List<List<string?>>(processingSetSize);
+                recordSet = new List<List<string?>>(processingSetSize);
             }
 
             try
@@ -127,7 +127,7 @@ namespace Simmetric.IO.Csv
                         if (outputMessageWriter != null)
                         {
                             //handled by CsvHandler
-                            outputMessageWriter.WriteLine(string.Format("{0}: Error: {1}", reader.LinePosition, this.handler.HandleRecordError(ex)));
+                            outputMessageWriter.WriteLine(string.Format("{0}: Error: {1}", reader.LinePosition, handler.HandleRecordError(ex)));
                         }
                         else
                         {
@@ -174,7 +174,7 @@ namespace Simmetric.IO.Csv
         /// </summary>
         /// <param name="fileName">Full path to the file.</param>
         /// <param name="format">A <see cref="T:Simmetric.IO.Csv.CsvFormat"/> object representing the formatting used in the stream.</param>
-        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="Simmetric.IO.Csv.ICsvSetHandler"/> to support this.</param>
+        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="ICsvSetHandler"/> to support this.</param>
         /// <returns>The number of rows processed</returns>
         public int ProcessFile(string fileName, CsvFormat format, int processingSetSize)
         {
@@ -186,7 +186,7 @@ namespace Simmetric.IO.Csv
         /// </summary>
         /// <param name="fileName">Full path to the file.</param>
         /// <param name="format">A <see cref="T:Simmetric.IO.Csv.CsvFormat"/> object representing the formatting used in the stream.</param>
-        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="Simmetric.IO.Csv.ICsvSetHandler"/> to support this.</param>
+        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="ICsvSetHandler"/> to support this.</param>
         /// <param name="startAtRecord">The parser will skip to the record number indicated.</param>
         /// <returns>The number of rows processed</returns>
         public int ProcessFile(string fileName, CsvFormat format, int processingSetSize, int startAtRecord)
@@ -227,7 +227,7 @@ namespace Simmetric.IO.Csv
         /// <param name="documentName">A descriptive name for the processed document, for logging purposes.</param>
         /// <param name="csvContent">A CSV formatted string</param>
         /// <param name="format">A <see cref="T:Simmetric.IO.Csv.CsvFormat"/> object representing the formatting used in the stream.</param>
-        /// <param name="processingSetSize">To pera orocess records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="Simmetric.IO.Csv.ICsvSetHandler"/> to support this.</param>
+        /// <param name="processingSetSize">To pera orocess records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="ICsvSetHandler"/> to support this.</param>
         /// <returns>An object containing the number of rows processed and the output messaging.</returns>
         public CsvProcessorResult<string> ProcessCsv(string documentName, string csvContent, CsvFormat format, int processingSetSize)
         {
@@ -240,7 +240,7 @@ namespace Simmetric.IO.Csv
         /// <param name="documentName">A descriptive name for the processed document, for logging purposes.</param>
         /// <param name="csvContent">A CSV formatted string</param>
         /// <param name="format">A <see cref="T:Simmetric.IO.Csv.CsvFormat"/> object representing the formatting used in the stream.</param>
-        /// <param name="processingSetSize">To pera orocess records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="Simmetric.IO.Csv.ICsvSetHandler"/> to support this.</param>
+        /// <param name="processingSetSize">To pera orocess records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="ICsvSetHandler"/> to support this.</param>
         /// <param name="startAtRecord">The parser will skip to the record number indicated.</param>
         /// <returns>An object containing the number of rows processed and the output messaging.</returns>
         public CsvProcessorResult<string> ProcessCsv(string documentName, string csvContent, CsvFormat format, int processingSetSize, int startAtRecord)
@@ -270,10 +270,10 @@ namespace Simmetric.IO.Csv
             stopWatch.Start();
 
             string? message = null;
-            if (!(this.recordHandler?.ProcessRecord(reader.LinePosition, line, out message) ?? false))
+            if (!(recordHandler?.ProcessRecord(reader.LinePosition, line, out message) ?? false))
             {
                 //if ProcessRecord returned false, log or output message
-                outputMessageWriter?.WriteLine(string.Format("{0}: {1}. {2} sec", reader.LinePosition, message, (double)stopWatch.ElapsedMilliseconds / 1000.0));
+                outputMessageWriter?.WriteLine(string.Format("{0}: {1}. {2} sec", reader.LinePosition, message, stopWatch.ElapsedMilliseconds / 1000.0));
             }
 
             //flush the output every 100 records
@@ -288,11 +288,11 @@ namespace Simmetric.IO.Csv
             stopWatch.Reset();
             stopWatch.Start();
 
-            this.recordSet.Add(reader.ReadLine().ToList());
+            recordSet.Add(reader.ReadLine().ToList());
 
             //when a set is completed or the stream is at its end, feed the collected records to the handler
             IEnumerable<string>? messages = null;
-            if (reader.LinePosition % setSize == 0 || (reader.EndOfStream && recordSet.Count > 0))
+            if (reader.LinePosition % setSize == 0 || reader.EndOfStream && recordSet.Count > 0)
             {
                 //feed recordset to handler
                 if (!(setHandler?.ProcessRecordSet(recordSet.ToArray(), out messages) ?? false) && outputWriter != null && messages != null)
@@ -300,12 +300,12 @@ namespace Simmetric.IO.Csv
                     //output messages
                     foreach (string message in messages)
                     {
-                        outputWriter.WriteLine(string.Format("{0}: {1}. {2} sec", reader.LinePosition, message, (double)stopWatch.ElapsedMilliseconds / 1000.0));
+                        outputWriter.WriteLine(string.Format("{0}: {1}. {2} sec", reader.LinePosition, message, stopWatch.ElapsedMilliseconds / 1000.0));
                     }
                     outputWriter.Flush();
                 }
                 //reset recordset
-                this.recordSet.Clear();
+                recordSet.Clear();
             }
         }
     }

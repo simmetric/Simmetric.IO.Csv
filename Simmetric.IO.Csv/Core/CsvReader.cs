@@ -111,15 +111,15 @@ namespace Simmetric.IO.Csv
                 {
                     var headerClean = header?.Replace(" ", string.Empty).Replace("/", string.Empty);
 
-                    FieldInfo field = fields.SingleOrDefault(f => f.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase));
-                    PropertyInfo property = props.SingleOrDefault(p => p.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase));
+                    FieldInfo? field = fields.SingleOrDefault(f => f.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase));
+                    PropertyInfo? property = props.SingleOrDefault(p => p.Name.Equals(headerClean, StringComparison.InvariantCultureIgnoreCase));
 
                     if (field == null && property == null)
                     {
                         continue;
                     }
 
-                    Type currentType = field != null ? field.FieldType : property.PropertyType;
+                    Type currentType = field != null ? field.FieldType : property!.PropertyType;
                     var value = GetValue(currentType);
                     if (field != null)
                     {
@@ -165,7 +165,7 @@ namespace Simmetric.IO.Csv
                 default:
                     if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == typeof(Nullable<>))
                     {
-                        return GetValue(Nullable.GetUnderlyingType(currentType));
+                        return GetValue(Nullable.GetUnderlyingType(currentType) ?? throw new InvalidOperationException($"{currentType.Name} is not a closed generic nullable type"));
                     }
                     return null;
             }
