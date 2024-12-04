@@ -8,6 +8,7 @@
     using System.IO;
     using System.Threading.Tasks;
     using NSubstitute.ExceptionExtensions;
+    using Simmetric.IO.Csv.Processsing;
 
     [TestClass]
     public class AsyncCsvProcessorTests

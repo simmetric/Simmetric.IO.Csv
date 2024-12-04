@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Simmetric.IO.Csv
+namespace Simmetric.IO.Csv.Processsing
 {
     /// <summary>
     /// Base interface for AsyncCsvHandler classes.

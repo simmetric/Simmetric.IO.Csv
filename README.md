@@ -1,5 +1,5 @@
 # Simmetric.IO.Csv
-.NET library for handling CSV files in various formats, including TSV, .
+.NET library for (asynchronously) handling CSV files in various formats, including TSV, .
 
 ## Why a CSV library?
 I'm sure we've all written a `while (streamReader.ReadLine()) { }` loop a million times thinking 'CSV is easy!' and then it always turned out to be more complicated than expected, often due to text delimiters.
@@ -24,18 +24,18 @@ var format = new CsvFormat {
 ### Handlers
 A handler class takes lines of CSV and processes them. Your handler class will do the actual work such as import the CSV into a database, or convert it to a different file format.
 
-To write a handler, implement Simmetric.IO.Csv.ICsvRecordHandler or Simmetric.IO.Csv.ICsvSetHandler.
-ICsvRecordHandler takes one record at a time, while ICsvSetHandler can take sets of a configurable number of records.
+To write a handler, implement Simmetric.IO.Csv.IAsyncCsvRecordHandler or Simmetric.IO.Csv.IAsyncCsvSetHandler.
+IAsyncCsvRecordHandler takes one record at a time, while IAsyncCsvSetHandler can take sets of a configurable number of records.
 
 ```csharp
-public class MyRecordHandler : Simmetric.IO.Csv.ICsvRecordHandler
+public class MyRecordHandler : Simmetric.IO.Csv.IAsyncCsvRecordHandler
 {
     int rowNumber;
     System.Data.SqlClient.SqlConnection con;
     System.Data.SqlClient.SqlTransaction trn;
 
     //Called for each record in the CSV file
-    public bool ProcessRecord(int recordNum, string[] fields, out string message)
+    public async Task<bool> ProcessRecordAsync(int recordNum, string[] fields, out string message)
     {
         //insert the data into a database table
         var com = new System.Data.SqlClient.SqlCommand("INSERT INTO table (id, name, address, city, dateofbirth) VALUES (@id, @name, @address, @city, @dateofbirth", con);
@@ -44,66 +44,66 @@ public class MyRecordHandler : Simmetric.IO.Csv.ICsvRecordHandler
         com.Parameters.AddWithValue("@address", fields[2]);
         com.Parameters.AddWithValue("@city", fields[3]);
         com.Parameters.AddWithValue("@dateofbirth", DateTime.Parse(fields[4]));
-        com.ExecuteNonQuery();
+        await com.ExecuteNonQueryAsync();
 
         rowNumber++;
     }
 
     //Called when opening a CSV file
-    public void BeginProcessing(string fileName, string[] headers = null)
+    public async Task BeginProcessingAsync(string fileName, string[] headers = null)
     {
         //initialize DB connection
         con = new System.Data.SqlClient.SqlConnection("your connectionstring here");
         con.Open();
-        trn = con.BeginTransaction();
+        trn = await con.BeginTransactionAsync();
         rowNumber = 0;
     }
 
     //Called after the last record in the CSV file is processed
-    public void EndProcessing()
+    public async Task EndProcessingAsync()
     {
         //commit transaction and close DB connection
-        trn.Commit();
-        con.Close();
-        con.Dispose();
+        await trn.CommitAsync();
+        await con.CloseAsync();
+        await con.DisposeAsync();
     }
 
     //Called when an unhandled exception occurs. Choose whether further processing should happen.
-    public string HandleRecordError(Exception ex)
+    public async Task<string> HandleRecordErrorAsync(Exception ex)
     {
         //to halt further record processing, throw an exception.
         //otherwise return a sensible message that describes the error.
-        trn.Rollback();
-        con.Dispose();
+        await trn.RollbackAsync();
+        await con.DisposeAsync();
         throw new System.Exception("Processing stopped because: " + ex.Message);
     }
 }
 ```
 
 ### Processing
-Use the CsvProcessor to read a file, stream or string containing CSV formatted text. The processor reads the CSV and feeds each line to a handler class.
+Use the AsyncCsvProcessor to read a file, stream or string containing CSV formatted text. The processor reads the CSV and feeds each line to a handler class.
 
 ```csharp
 var myHandler = new MyRecordHandler();
-var processor = new CsvProcessor(myHandler);
-processor.ProcessFile("C:\\My Documents\\myfile.csv", format);
+var processor = new AsyncCsvProcessor(myHandler);
+await processor.ProcessFileAsync("C:\\My Documents\\myfile.csv", format);
 ```
 
 ### Reading
 To simply read a CSV file row by row, use the CsvReader:
 ```csharp
-var reader = new CsvReader(fileStream, format);
+using var reader = new AsyncCsvReader(fileStream, format);
 while (!reader.EndOfStream)
 {
    //read the CSV line by line
    IEnumerable<string> line = reader.ReadLine();
    
    //or read each cell individually
-   int id = reader.ReadAsInt();
-   string name = reader.Read();
-   string address = reader.Read();
-   string city = reader.Read();
-   DateTime dateofbirth = reader.ReadAsDateTime();
+   int id = await reader.ReadAsIntAsync();
+   string name = await reader.ReadAsync();
+   string address = await reader.ReadAsync();
+   string city = await reader.ReadAsync();
+   DateTime dateofbirth = await reader.ReadAsDateTimeAsync();
    
    //read a line and return a populated object
    //note: the CSV must have headers that correspond to field names in a class
@@ -115,18 +115,18 @@ while (!reader.EndOfStream)
       public string City { get; set; }
       public DateTime DateOfBirth { get; set; }
    }
-   Person person = reader.ReadLine<Person>();
+   Person person = await reader.ReadLineAsync<Person>();
 
-   //note: each Read call advances the position of the CsvReader
+   //note: each Read call advances the position of the AsyncCsvReader
 }
 ```
 
 It is also possible to read a CSV file to the end and return all rows as an iterator:
 ```csharp
-var reader = new CsvReader(fileStream, format);
-foreach (IEnumerable<string> line in reader.ReadToEnd())
+using var reader = new AsyncCsvReader(fileStream, format);
+await foreach (IEnumerable<string> line in reader.ReadToEndAsync())
 {
-   //line contains all fields as strings, just like ReadLine()
+   //line contains all fields as strings, just like ReadLineAsync()
 }
 
 class Person 
@@ -137,7 +137,7 @@ class Person
    public string City { get; set; }
    public DateTime DateOfBirth { get; set; }
 }
-foreach (Person person in reader.ReadToEnd<Person>())
+await foreach (Person person in reader.ReadToEndAsync<Person>())
 {
    //person is an instance of class Person
 }
@@ -146,13 +146,13 @@ foreach (Person person in reader.ReadToEnd<Person>())
 ### Writing
 With the CsvWriter class you can output CSV formatted text to a stream.
 ```csharp
-using (var writer = new CsvWriter(outputStream, format))
+using (var writer = new AsyncCsvWriter(outputStream, format))
 {
  //write a string array as a line
- writer.WriteLine(new string[]{"1", "Mike O'Toole", "1234 West Street\r\n12345 Springfield NY", "Springfield", "1980-01-01"});
+ await writer.WriteLineAsync(new string[]{"1", "Mike O'Toole", "1234 West Street\r\n12345 Springfield NY", "Springfield", "1980-01-01"});
  //or write cells individually
- writer.Write("1");
- writer.WriteColumnSeparator();
- writer.WriteLineSeparator();
+ await writer.WriteAsync("1");
+ await writer.WriteColumnSeparatorAsync();
+ await writer.WriteLineSeparatorAsync();
 }
 ```

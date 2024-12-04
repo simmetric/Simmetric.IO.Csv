@@ -1,4 +1,4 @@
-﻿namespace Simmetric.IO.Csv
+﻿namespace Simmetric.IO.Csv.Processsing
 {
     /// <summary>
     /// Contains information on the result of a processed CSV document
@@ -17,8 +17,8 @@
 
         internal CsvProcessorResult(int rowsProcessed, T output)
         {
-            this.RowsProcessed = rowsProcessed;
-            this.Output = output;
+            RowsProcessed = rowsProcessed;
+            Output = output;
         }
     }
 }

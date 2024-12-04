@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Simmetric.IO.Csv
+namespace Simmetric.IO.Csv.Processsing
 {
     /// <summary>
     /// Base interface for CsvHandler classes.

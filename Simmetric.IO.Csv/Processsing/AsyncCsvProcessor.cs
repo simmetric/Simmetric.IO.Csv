@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Simmetric.IO.Csv
+namespace Simmetric.IO.Csv.Processsing
 {
     /// <summary>
     /// Parses a CSV document and feeds rows to a supplied handler object.
@@ -43,7 +43,7 @@ namespace Simmetric.IO.Csv
         /// <param name="documentName">A descriptive name for the processed document, for logging purposes.</param>
         /// <param name="inputStream">A CSV formatted stream containing data to be processed.</param>
         /// <param name="format">A <see cref="T:Simmetric.IO.Csv.CsvFormat"/> object representing the formatting used in the stream.</param>
-        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="Simmetric.IO.Csv.ICsvSetHandler"/> to support this.</param>
+        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="ICsvSetHandler"/> to support this.</param>
         public async Task<int> ProcessStreamAsync(string documentName, Stream inputStream, CsvFormat format, int processingSetSize)
         {
             return await ProcessStreamAsync(documentName, inputStream, null, format, processingSetSize, 0);
@@ -56,7 +56,7 @@ namespace Simmetric.IO.Csv
         /// <param name="inputStream">A CSV formatted stream containing data to be processed.</param>
         /// <param name="outputMessageStream">Output messages will be written to this stream.</param>
         /// <param name="format">A <see cref="T:Simmetric.IO.Csv.CsvFormat"/> object representing the formatting used in the stream.</param>
-        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="Simmetric.IO.Csv.ICsvSetHandler"/> to support this.</param>
+        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="ICsvSetHandler"/> to support this.</param>
         /// <param name="startAtRecord">The parser will skip to the record number indicated.</param>
         /// <returns>The number of rows processed</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "Recordset"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "ICsvSetHandler")]
@@ -176,7 +176,7 @@ namespace Simmetric.IO.Csv
         /// </summary>
         /// <param name="fileName">Full path to the file.</param>
         /// <param name="format">A <see cref="T:Simmetric.IO.Csv.CsvFormat"/> object representing the formatting used in the stream.</param>
-        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="Simmetric.IO.Csv.ICsvSetHandler"/> to support this.</param>
+        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="ICsvSetHandler"/> to support this.</param>
         /// <returns>The number of rows processed</returns>
         public async Task<int> ProcessFileAsync(string fileName, CsvFormat format, int processingSetSize)
         {
@@ -188,7 +188,7 @@ namespace Simmetric.IO.Csv
         /// </summary>
         /// <param name="fileName">Full path to the file.</param>
         /// <param name="format">A <see cref="T:Simmetric.IO.Csv.CsvFormat"/> object representing the formatting used in the stream.</param>
-        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="Simmetric.IO.Csv.ICsvSetHandler"/> to support this.</param>
+        /// <param name="processingSetSize">To process records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="ICsvSetHandler"/> to support this.</param>
         /// <param name="startAtRecord">The parser will skip to the record number indicated.</param>
         /// <returns>The number of rows processed</returns>
         public async Task<int> ProcessFileAsync(string fileName, CsvFormat format, int processingSetSize, int startAtRecord)
@@ -229,7 +229,7 @@ namespace Simmetric.IO.Csv
         /// <param name="documentName">A descriptive name for the processed document, for logging purposes.</param>
         /// <param name="csvContent">A CSV formatted string</param>
         /// <param name="format">A <see cref="T:Simmetric.IO.Csv.CsvFormat"/> object representing the formatting used in the stream.</param>
-        /// <param name="processingSetSize">To pera orocess records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="Simmetric.IO.Csv.ICsvSetHandler"/> to support this.</param>
+        /// <param name="processingSetSize">To pera orocess records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="ICsvSetHandler"/> to support this.</param>
         /// <returns>An object containing the number of rows processed and the output messaging.</returns>
         public async Task<CsvProcessorResult<string>> ProcessCsvAsync(string documentName, string csvContent, CsvFormat format, int processingSetSize)
         {
@@ -242,7 +242,7 @@ namespace Simmetric.IO.Csv
         /// <param name="documentName">A descriptive name for the processed document, for logging purposes.</param>
         /// <param name="csvContent">A CSV formatted string</param>
         /// <param name="format">A <see cref="T:Simmetric.IO.Csv.CsvFormat"/> object representing the formatting used in the stream.</param>
-        /// <param name="processingSetSize">To pera orocess records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="Simmetric.IO.Csv.ICsvSetHandler"/> to support this.</param>
+        /// <param name="processingSetSize">To pera orocess records in sets instead of individually, enter a set size larger than 1. The CsvHandler must implement <see cref="ICsvSetHandler"/> to support this.</param>
         /// <param name="startAtRecord">The parser will skip to the record number indicated.</param>
         /// <returns>An object containing the number of rows processed and the output messaging.</returns>
         public async Task<CsvProcessorResult<string>> ProcessCsvAsync(string documentName, string csvContent, CsvFormat format, int processingSetSize, int startAtRecord)
@@ -294,7 +294,7 @@ namespace Simmetric.IO.Csv
 
             //when a set is completed or the stream is at its end, feed the collected records to the handler
             IEnumerable<string>? messages = null;
-            if (reader.LinePosition % setSize == 0 || (reader.EndOfStream && recordSet.Count > 0))
+            if (reader.LinePosition % setSize == 0 || reader.EndOfStream && recordSet.Count > 0)
             {
                 //feed recordset to handler
                 if (!await setHandler!.ProcessRecordSetAsync(recordSet.ToArray(), out messages) && outputWriter != null && messages != null)
@@ -302,7 +302,7 @@ namespace Simmetric.IO.Csv
                     //output messages
                     foreach (string message in messages)
                     {
-                        outputWriter.WriteLine(string.Format("{0}: {1}. {2} sec", reader.LinePosition, message, (double)stopWatch.ElapsedMilliseconds / 1000.0));
+                        outputWriter.WriteLine(string.Format("{0}: {1}. {2} sec", reader.LinePosition, message, stopWatch.ElapsedMilliseconds / 1000.0));
                     }
                     outputWriter.Flush();
                 }

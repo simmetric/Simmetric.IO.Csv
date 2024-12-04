@@ -6,6 +6,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using NSubstitute;
     using System.IO;
+    using Simmetric.IO.Csv.Processsing;
 
     [TestClass]
     public class CsvProcessorTests
