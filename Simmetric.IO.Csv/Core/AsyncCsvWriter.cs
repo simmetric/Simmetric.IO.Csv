@@ -156,11 +156,14 @@ namespace Simmetric.IO.Csv.Core
         /// </summary>
         public async Task CloseAsync()
         {
-            if (writer == null)
+            await Task.Run(() =>
             {
-                throw new InvalidOperationException($"{nameof(writer)} was null");
-            }
-            writer.Close();
+                if (writer == null)
+                {
+                    throw new InvalidOperationException($"{nameof(writer)} was null");
+                }
+                writer.Close();
+            });
         }
 
         /// <summary>
